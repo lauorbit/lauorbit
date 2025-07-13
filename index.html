@@ -331,21 +331,6 @@
             );
         };
         
-        const levenshteinDistance = (a, b) => {
-            const an = a ? a.length : 0, bn = b ? b.length : 0;
-            if (an === 0) return bn; if (bn === 0) return an;
-            const matrix = Array.from({ length: bn + 1 }, () => Array(an + 1).fill(0));
-            for (let i = 0; i <= an; i++) matrix[0][i] = i;
-            for (let j = 0; j <= bn; j++) matrix[j][0] = j;
-            for (let j = 1; j <= bn; j++) {
-                for (let i = 1; i <= an; i++) {
-                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-                    matrix[j][i] = Math.min(matrix[j][i - 1] + 1, matrix[j - 1][i] + 1, matrix[j - 1][i - 1] + cost);
-                }
-            }
-            return matrix[bn][an];
-        };
-        
         const showInfoModal = (message) => {
             const modalOverlay = document.createElement('div');
             modalOverlay.className = 'modal-overlay';
@@ -506,17 +491,22 @@
                     return issn1 === queryIssn || issn2 === queryIssn;
                 });
             } else {
-                const allMatches = journalData.filter(j => j.JournalName && j.JournalName.toLowerCase().includes(query));
-                const exactMatch = allMatches.find(j => j.JournalName.toLowerCase() === query);
-                const otherMatches = allMatches.filter(j => j.JournalName.toLowerCase() !== query);
-
-                otherMatches.sort((a,b) => (a.JournalName || '').localeCompare(b.JournalName || ''));
-                
-                if (exactMatch) {
-                    results = [exactMatch, ...otherMatches];
-                } else {
-                    results = otherMatches;
-                }
+                results = journalData
+                    .filter(j => j.JournalName && j.JournalName.toLowerCase().includes(query))
+                    .map(journal => {
+                        const name = journal.JournalName.toLowerCase();
+                        let score = 4; // Contains
+                        if (name === query) score = 1; // Exact match
+                        else if (name.startsWith(query)) score = 2; // Starts with
+                        else if (name.split(' ').some(word => word.startsWith(query))) score = 3; // Word starts with
+                        return { ...journal, score };
+                    })
+                    .sort((a, b) => {
+                        if (a.score !== b.score) {
+                            return a.score - b.score;
+                        }
+                        return (a.JournalName || '').localeCompare(b.JournalName || '');
+                    });
             }
             displayFullDetailCards(results);
         };
