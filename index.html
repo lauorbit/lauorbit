@@ -422,7 +422,7 @@
                             <p><strong>Norwegian Level:</strong> ${formatValue(journal.NorwegianLevel)}</p>
                             ${otherRanksHtml}
                              <p><strong>Business Rankings<span onclick="showInfoModal('This indicates if the LAU ORBIT Rank is taking into account ABDC, AJG, FNEGE, and VHB. These rankings are only used for journals primarily focused on business, economics, and finance.')">${infoIconSvg}</span>:</strong> ${businessRanking}</p>
-                             <p><strong>Uncertainty Score<span onclick="showInfoModal('This score shows how much the ranking systems disagree with each other. A lower score indicates a more reliable grade, while a higher score indicates conflicting opinions.')">${infoIconSvg}</span>:</strong> ${uncertaintyScore}</p>
+                             <p><strong>Uncertainty Score<span onclick="showInfoModal('This score shows how much the ranking systems disagree with each other. A lower score indicates a more reliable grade, while a higher score indicates conflicting opinions. A value below 5 indicates strong consensus.')">${infoIconSvg}</span>:</strong> ${uncertaintyScore}</p>
                         </div>
                         <div>
                             <p><strong>ISSN1:</strong> ${formatValue(journal.ISSN1)}</p>
