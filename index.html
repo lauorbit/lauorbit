@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LAU Journal Finder</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDD4JMS2G3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-HDD4JMS2G3');
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Library to read XLSX files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -132,6 +141,20 @@
             cursor: pointer;
             color: #6b7280;
         }
+        /* Clear button for search input */
+        .clear-search {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #9ca3af;
+            display: none; /* Hidden by default */
+        }
+        .search-input-wrapper:focus-within .clear-search,
+        .search-input-wrapper .search-input:not(:placeholder-shown) + .clear-search {
+            display: block;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -158,13 +181,23 @@
                     <button id="tab-about" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
                         About
                     </button>
+                    <button id="tab-contact" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
+                        Contact Us
+                    </button>
                 </nav>
             </div>
 
             <!-- Search by Journal Section -->
             <div id="panel-journal-search" class="hidden">
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <input type="text" id="journal-input" class="search-input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lau-green" placeholder="Enter journal name or ISSN">
+                    <div class="relative w-full search-input-wrapper">
+                        <input type="text" id="journal-input" class="search-input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lau-green" placeholder="Enter journal name or ISSN">
+                        <span id="clear-search-btn" class="clear-search">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </span>
+                    </div>
                     <button id="search-btn" class="bg-lau-green text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition">Search</button>
                 </div>
             </div>
@@ -203,7 +236,7 @@
             <!-- About Section -->
             <div id="panel-about" class="hidden prose max-w-none">
                 <h2 class="lau-green">About the LAU ORBIT Ranking</h2>
-                <p>The LAU ORBIT (Objective Ranking Based on Integrated Tiers) is a meta-ranking system designed by the Graduate Studies and Research (GSR) office at the Lebanese American University (LAU) to provide a reliable and comprehensive evaluation of academic journals. It synthesizes multiple expert-opinion-based rankings, mitigating individual biases to produce a more robust and trustworthy score.</p>
+                <p>The LAU ORBIT (Objective Ranking Based on Integrated Tiers) is a meta-ranking system designed to provide a reliable and comprehensive evaluation of academic journals. It synthesizes multiple expert-opinion-based rankings, mitigating individual biases to produce a more robust and trustworthy score.</p>
                 <h3 class="lau-green">Letter Grade System</h3>
                 <p>Journals are assigned a letter grade based on their calculated score, reflecting their standing within the academic community.</p>
                 <ul class="list-disc pl-5">
@@ -236,6 +269,33 @@
                 </ul>
                 <p>We also use the <a href="http://arc.gov.au/manage-your-grant/classification-codes-rfcd-seo-and-anzsic-codes" target="_blank" class="text-lau-green hover:underline">Australian and New Zealand Standard Research Classification (ANZSRC)</a> to indicate the Field of Research of each journal.</p>
             </div>
+            
+            <!-- Contact Us Section -->
+            <div id="panel-contact" class="hidden">
+                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Contact Us</h2>
+                 <p class="text-gray-600 mb-6">Have a question or a suggestion? Fill out the form below to send us an email.</p>
+                 <form id="contact-form" class="space-y-4 max-w-lg mx-auto">
+                     <div>
+                         <label for="contact-name" class="block text-sm font-medium text-gray-700">Name</label>
+                         <input type="text" id="contact-name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lau-green focus:border-lau-green">
+                     </div>
+                      <div>
+                         <label for="contact-position" class="block text-sm font-medium text-gray-700">Job Position</label>
+                         <input type="text" id="contact-position" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lau-green focus:border-lau-green">
+                     </div>
+                     <div>
+                         <label for="contact-email" class="block text-sm font-medium text-gray-700">Email</label>
+                         <input type="email" id="contact-email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lau-green focus:border-lau-green">
+                     </div>
+                     <div>
+                         <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
+                         <textarea id="contact-message" rows="4" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lau-green focus:border-lau-green"></textarea>
+                     </div>
+                     <div>
+                         <button type="submit" class="w-full bg-lau-green text-white px-6 py-3 rounded-md hover:bg-opacity-90 transition">Send Email</button>
+                     </div>
+                 </form>
+            </div>
 
 
             <!-- Results Section / Loading Indicator -->
@@ -249,6 +309,7 @@
         // DOM Elements
         const journalInput = document.getElementById('journal-input');
         const searchBtn = document.getElementById('search-btn');
+        const clearSearchBtn = document.getElementById('clear-search-btn');
         const filterBtn = document.getElementById('filter-btn');
         const resetBtn = document.getElementById('reset-btn');
         const resultsContainer = document.getElementById('results-container');
@@ -256,20 +317,33 @@
         const forNameSelect = document.getElementById('for-name-select');
         const publisherSelect = document.getElementById('publisher-select');
         const sortSelect = document.getElementById('sort-select');
+        const contactForm = document.getElementById('contact-form');
         const tabContainer = document.getElementById('tab-container');
         const tabJournalSearch = document.getElementById('tab-journal-search');
         const tabFilterSearch = document.getElementById('tab-filter-search');
         const tabAbout = document.getElementById('tab-about');
+        const tabContact = document.getElementById('tab-contact');
         const panelJournalSearch = document.getElementById('panel-journal-search');
         const panelFilterSearch = document.getElementById('panel-filter-search');
         const panelAbout = document.getElementById('panel-about');
+        const panelContact = document.getElementById('panel-contact');
 
         // App State
         let journalData = [];
         let tomSelectInstances = {};
 
         // --- Utility Functions ---
-        const toTitleCase = (str) => {
+        const toTitleCaseWithAcronyms = (str) => {
+            if (!str || typeof str !== 'string') return '';
+            return str.replace(/\w\S*/g, (txt) => {
+                if (txt.toUpperCase() === txt && txt.length > 1) {
+                    return txt; // Preserve acronym
+                }
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
+        };
+
+        const toTitleCaseStrict = (str) => {
             if (!str || typeof str !== 'string') return '';
             return str.replace(
                 /\w\S*/g,
@@ -311,28 +385,19 @@
         };
 
         // --- Display Functions ---
-        const displayFullDetailCards = (mainResults, otherMatches = []) => {
+        const displayFullDetailCards = (results) => {
             resultsContainer.innerHTML = '';
-            const totalFound = mainResults.length + otherMatches.length;
             const statusMessage = document.createElement('p');
             statusMessage.className = 'text-gray-600 italic my-4';
-            statusMessage.textContent = `Found ${totalFound} journal(s).`;
+            statusMessage.textContent = `Found ${results.length} journal(s).`;
             resultsContainer.appendChild(statusMessage);
 
-            if (totalFound === 0) return;
+            if (results.length === 0) return;
 
             const container = document.createElement('div');
             container.className = 'flex flex-col gap-6';
             
-            mainResults.forEach(journal => container.appendChild(createDetailCard(journal)));
-            
-            if (otherMatches.length > 0) {
-                const otherMatchesHeader = document.createElement('h4');
-                otherMatchesHeader.className = 'text-lg font-semibold mt-8 border-t pt-4';
-                otherMatchesHeader.textContent = mainResults.length > 0 ? 'Other possible matches:' : 'No exact match found, other possible matches:';
-                container.appendChild(otherMatchesHeader);
-                otherMatches.forEach(journal => container.appendChild(createDetailCard(journal)));
-            }
+            results.forEach(journal => container.appendChild(createDetailCard(journal)));
             
             resultsContainer.appendChild(container);
         };
@@ -355,13 +420,14 @@
             const forCodesHtml = [1, 2, 3].map(i => {
                 const code = journal[`FoR ${i} Code`];
                 const name = journal[`FoR ${i} Name`];
-                return (code && name) ? `<p><strong>FoR ${i}:</strong> ${toTitleCase(name)} (${code})</p>` : '';
+                return (code && name) ? `<p><strong>FoR ${i}:</strong> ${toTitleCaseStrict(name)} (${code})</p>` : '';
             }).join('');
 
             const eliteStatus = journal.IsElite == 1 ? 'Yes' : 'No';
             const warningStatus = journal.OnWarningList || 'No';
             const businessRanking = journal.SpecialCalcFlag == 1 ? 'Included' : 'Excluded';
-            const uncertaintyScore = journal.Score_Uncertainty !== undefined ? parseFloat(journal.Score_Uncertainty).toFixed(1) : 'N/A';
+            const score = parseFloat(journal.Score_Uncertainty);
+            const uncertaintyScore = !isNaN(score) ? score.toFixed(1) : 'N/A';
             const rankDWarning = journal.LAU_ORBIT_Rank === 'D' ? `<p class="mt-2 p-2 bg-red-100 text-red-700 rounded-md text-sm"><strong>Warning:</strong> You are highly recommended not to publish in this journal.</p>` : '';
             
             const infoIconSvg = `<svg class="info-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>`;
@@ -376,7 +442,7 @@
                             <p><strong>Norwegian Level:</strong> ${formatValue(journal.NorwegianLevel)}</p>
                             ${otherRanksHtml}
                              <p><strong>Business Rankings<span onclick="showInfoModal('This indicates if the LAU ORBIT Rank is taking into account ABDC, AJG, FNEGE, and VHB. These rankings are only used for journals primarily focused on business, economics, and finance.')">${infoIconSvg}</span>:</strong> ${businessRanking}</p>
-                             <p><strong>Uncertainty Score<span onclick="showInfoModal('This score shows how much the ranking systems disagree with each other. A lower score indicates a more reliable grade, while a higher score indicates conflicting opinions. A value below 5 indicates a strong consensus.')">${infoIconSvg}</span>:</strong> ${uncertaintyScore}</p>
+                             <p><strong>Uncertainty Score<span onclick="showInfoModal('This score shows how much the ranking systems disagree with each other. A lower score indicates a more reliable grade, while a higher score indicates conflicting opinions.')">${infoIconSvg}</span>:</strong> ${uncertaintyScore}</p>
                         </div>
                         <div>
                             <p><strong>ISSN1:</strong> ${formatValue(journal.ISSN1)}</p>
@@ -409,7 +475,7 @@
                 const wrapper = document.createElement('div');
                 const summaryItem = document.createElement('div');
                 summaryItem.className = 'summary-item flex justify-between items-center p-3 border rounded-md';
-                summaryItem.innerHTML = `<span class="font-medium text-gray-800">${journal.JournalName || 'N/A'}</span><span class="lau-green font-semibold text-sm">${journal.LAU_ORBIT_Rank || 'N/A'}</span>`;
+                summaryItem.innerHTML = `<span class="font-medium text-gray-800">${toTitleCaseWithAcronyms(journal.JournalName || 'N/A')}</span><span class="lau-green font-semibold text-sm">${journal.LAU_ORBIT_Rank || 'N/A'}</span>`;
                 
                 const detailItem = document.createElement('div');
                 detailItem.className = 'hidden p-4 border border-t-0 rounded-b-md bg-gray-50 detail-view';
@@ -437,7 +503,7 @@
         const createDetailCard = (journal) => {
             const card = document.createElement('div');
             card.className = 'result-card bg-white rounded-lg shadow-md p-5';
-            card.innerHTML = `<h3 class="text-xl font-bold text-gray-800 mb-3">${journal.JournalName || 'N/A'}</h3>`;
+            card.innerHTML = `<h3 class="text-xl font-bold text-gray-800 mb-3">${toTitleCaseWithAcronyms(journal.JournalName || 'N/A')}</h3>`;
             card.appendChild(createDetailContent(journal));
             return card;
         };
@@ -446,24 +512,20 @@
         const handleSearch = () => {
             const query = journalInput.value.trim().toLowerCase();
             if (!query) {
-                displayFullDetailCards([], 'Please enter a search term.');
+                displayFullDetailCards([]);
                 return;
             }
             const isIssn = /^\d{4}-?\d{3}[\dxX]$/.test(query);
-            let mainResults = [];
-            let otherMatches = [];
+            let results = [];
 
             if (isIssn) {
                 const issnQuery = query.replace('-', '');
-                mainResults = journalData.filter(j => (j.ISSN1 && String(j.ISSN1).replace('-', '') === issnQuery) || (j.ISSN2 && String(j.ISSN2).replace('-', '') === issnQuery));
+                results = journalData.filter(j => (j.ISSN1 && String(j.ISSN1).replace('-', '') === issnQuery) || (j.ISSN2 && String(j.ISSN2).replace('-', '') === issnQuery));
             } else {
-                mainResults = journalData.filter(j => j.JournalName && j.JournalName.toLowerCase() === query);
-                const partialMatches = journalData.filter(j => j.JournalName && j.JournalName.toLowerCase().startsWith(query) && j.JournalName.toLowerCase() !== query);
-                const similarMatches = journalData.filter(j => j.JournalName && levenshteinDistance(j.JournalName.toLowerCase(), query) <= 2 && j.JournalName.toLowerCase() !== query);
-                otherMatches = [...new Set([...partialMatches, ...similarMatches])];
-                otherMatches.sort((a,b) => (a.JournalName || '').localeCompare(b.JournalName || ''));
+                results = journalData.filter(j => j.JournalName && j.JournalName.toLowerCase().includes(query));
             }
-            displayFullDetailCards(mainResults, otherMatches);
+            results.sort((a,b) => (a.JournalName || '').localeCompare(b.JournalName || ''));
+            displayFullDetailCards(results);
         };
 
         const handleFilter = () => {
@@ -476,9 +538,9 @@
                 const rankMatch = selectedRanks.length === 0 || selectedRanks.includes(String(j.LAU_ORBIT_Rank));
                 const publisherMatch = selectedPublishers.length === 0 || selectedPublishers.includes(j.Publisher);
                 const forNameMatch = selectedForNames.length === 0 || selectedForNames.some(name => 
-                    toTitleCase(j['FoR 1 Name']) === name || 
-                    toTitleCase(j['FoR 2 Name']) === name || 
-                    toTitleCase(j['FoR 3 Name']) === name
+                    toTitleCaseStrict(j['FoR 1 Name']) === name || 
+                    toTitleCaseStrict(j['FoR 2 Name']) === name || 
+                    toTitleCaseStrict(j['FoR 3 Name']) === name
                 );
                 return rankMatch && publisherMatch && forNameMatch;
             });
@@ -532,7 +594,7 @@
             journalData.forEach(j => {
                 for (let i = 1; i <= 3; i++) {
                     const name = j[`FoR ${i} Name`];
-                    if (name && name.trim()) forNames.add(toTitleCase(name.trim()));
+                    if (name && name.trim()) forNames.add(toTitleCaseStrict(name.trim()));
                 }
             });
             const sortedForNames = [...forNames].sort((a, b) => a.localeCompare(b));
@@ -547,7 +609,8 @@
             const tabs = {
                 journal: { button: tabJournalSearch, panel: panelJournalSearch },
                 filter: { button: tabFilterSearch, panel: panelFilterSearch },
-                about: { button: tabAbout, panel: panelAbout }
+                about: { button: tabAbout, panel: panelAbout },
+                contact: { button: tabContact, panel: panelContact }
             };
             Object.values(tabs).forEach(({ button, panel }) => {
                 button.classList.remove('active');
@@ -561,11 +624,29 @@
         // Event Listeners
         searchBtn.addEventListener('click', handleSearch);
         journalInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleSearch(); });
+        clearSearchBtn.addEventListener('click', () => {
+            journalInput.value = '';
+            resultsContainer.innerHTML = '';
+        });
         filterBtn.addEventListener('click', handleFilter);
         resetBtn.addEventListener('click', handleResetFilters);
         tabJournalSearch.addEventListener('click', () => switchTab('journal'));
         tabFilterSearch.addEventListener('click', () => switchTab('filter'));
         tabAbout.addEventListener('click', () => switchTab('about'));
+        tabContact.addEventListener('click', () => switchTab('contact'));
+        
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('contact-name').value;
+            const position = document.getElementById('contact-position').value;
+            const email = document.getElementById('contact-email').value;
+            const message = document.getElementById('contact-message').value;
+            
+            const subject = encodeURIComponent('Message from ORBIT Rankings User');
+            const body = encodeURIComponent(`Name: ${name}\nJob Position: ${position}\nEmail: ${email}\n\nMessage:\n${message}`);
+            
+            window.location.href = `mailto:ssaab@lau.edu.lb?subject=${subject}&body=${body}`;
+        });
         
         // Data Loading
         window.addEventListener('DOMContentLoaded', async () => {
