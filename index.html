@@ -331,6 +331,21 @@
             );
         };
         
+        const levenshteinDistance = (a, b) => {
+            const an = a ? a.length : 0, bn = b ? b.length : 0;
+            if (an === 0) return bn; if (bn === 0) return an;
+            const matrix = Array.from({ length: bn + 1 }, () => Array(an + 1).fill(0));
+            for (let i = 0; i <= an; i++) matrix[0][i] = i;
+            for (let j = 0; j <= bn; j++) matrix[j][0] = j;
+            for (let j = 1; j <= bn; j++) {
+                for (let i = 1; i <= an; i++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    matrix[j][i] = Math.min(matrix[j][i - 1] + 1, matrix[j - 1][i] + 1, matrix[j - 1][i - 1] + cost);
+                }
+            }
+            return matrix[bn][an];
+        };
+        
         const showInfoModal = (message) => {
             const modalOverlay = document.createElement('div');
             modalOverlay.className = 'modal-overlay';
@@ -407,7 +422,7 @@
                             <p><strong>Norwegian Level:</strong> ${formatValue(journal.NorwegianLevel)}</p>
                             ${otherRanksHtml}
                              <p><strong>Business Rankings<span onclick="showInfoModal('This indicates if the LAU ORBIT Rank is taking into account ABDC, AJG, FNEGE, and VHB. These rankings are only used for journals primarily focused on business, economics, and finance.')">${infoIconSvg}</span>:</strong> ${businessRanking}</p>
-                             <p><strong>Uncertainty Score<span onclick="showInfoModal('This score shows how much the ranking systems disagree with each other. A lower score indicates a more reliable grade, while a higher score indicates conflicting opinions. A value below 5 indicates strong consensus.')">${infoIconSvg}</span>:</strong> ${uncertaintyScore}</p>
+                             <p><strong>Uncertainty Score<span onclick="showInfoModal('This score quantifies the disagreement among the ranking systems. A low score (e.g., below 5) indicates a reliable grade based on strong consensus, while a high score reveals conflicting views.')">${infoIconSvg}</span>:</strong> ${uncertaintyScore}</p>
                         </div>
                         <div>
                             <p><strong>ISSN1:</strong> ${formatValue(journal.ISSN1)}</p>
