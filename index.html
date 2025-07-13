@@ -272,29 +272,10 @@
             
             <!-- Contact Us Section -->
             <div id="panel-contact" class="hidden">
-                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Contact Us</h2>
-                 <p class="text-gray-600 mb-6">Have a question or a suggestion? Fill out the form below to send us an email.</p>
-                 <form id="contact-form" class="space-y-4 max-w-lg mx-auto">
-                     <div>
-                         <label for="contact-name" class="block text-sm font-medium text-gray-700">Name</label>
-                         <input type="text" id="contact-name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lau-green focus:border-lau-green">
-                     </div>
-                      <div>
-                         <label for="contact-position" class="block text-sm font-medium text-gray-700">Job Position</label>
-                         <input type="text" id="contact-position" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lau-green focus:border-lau-green">
-                     </div>
-                     <div>
-                         <label for="contact-email" class="block text-sm font-medium text-gray-700">Email</label>
-                         <input type="email" id="contact-email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lau-green focus:border-lau-green">
-                     </div>
-                     <div>
-                         <label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label>
-                         <textarea id="contact-message" rows="4" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-lau-green focus:border-lau-green"></textarea>
-                     </div>
-                     <div>
-                         <button type="submit" class="w-full bg-lau-green text-white px-6 py-3 rounded-md hover:bg-opacity-90 transition">Send Email</button>
-                     </div>
-                 </form>
+                 <p class="text-gray-600 mb-6">Have an issue, question or suggestion? Please use the form below to get in touch.</p>
+                 <div class="aspect-w-1 aspect-h-1" style="height: 856px;">
+                    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeLPW40BfHHuA6gb6OU1YtDjxE3TRc0SRuvlTGanI9_CwdVkA/viewform?embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                 </div>
             </div>
 
 
@@ -317,7 +298,6 @@
         const forNameSelect = document.getElementById('for-name-select');
         const publisherSelect = document.getElementById('publisher-select');
         const sortSelect = document.getElementById('sort-select');
-        const contactForm = document.getElementById('contact-form');
         const tabContainer = document.getElementById('tab-container');
         const tabJournalSearch = document.getElementById('tab-journal-search');
         const tabFilterSearch = document.getElementById('tab-filter-search');
@@ -519,12 +499,25 @@
             let results = [];
 
             if (isIssn) {
-                const issnQuery = query.replace('-', '');
-                results = journalData.filter(j => (j.ISSN1 && String(j.ISSN1).replace('-', '') === issnQuery) || (j.ISSN2 && String(j.ISSN2).replace('-', '') === issnQuery));
+                results = journalData.filter(j => {
+                    const issn1 = String(j.ISSN1 || '').replace('-', '');
+                    const issn2 = String(j.ISSN2 || '').replace('-', '');
+                    const queryIssn = query.replace('-', '');
+                    return issn1 === queryIssn || issn2 === queryIssn;
+                });
             } else {
-                results = journalData.filter(j => j.JournalName && j.JournalName.toLowerCase().includes(query));
+                const allMatches = journalData.filter(j => j.JournalName && j.JournalName.toLowerCase().includes(query));
+                const exactMatch = allMatches.find(j => j.JournalName.toLowerCase() === query);
+                const otherMatches = allMatches.filter(j => j.JournalName.toLowerCase() !== query);
+
+                otherMatches.sort((a,b) => (a.JournalName || '').localeCompare(b.JournalName || ''));
+                
+                if (exactMatch) {
+                    results = [exactMatch, ...otherMatches];
+                } else {
+                    results = otherMatches;
+                }
             }
-            results.sort((a,b) => (a.JournalName || '').localeCompare(b.JournalName || ''));
             displayFullDetailCards(results);
         };
 
@@ -634,19 +627,6 @@
         tabFilterSearch.addEventListener('click', () => switchTab('filter'));
         tabAbout.addEventListener('click', () => switchTab('about'));
         tabContact.addEventListener('click', () => switchTab('contact'));
-        
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('contact-name').value;
-            const position = document.getElementById('contact-position').value;
-            const email = document.getElementById('contact-email').value;
-            const message = document.getElementById('contact-message').value;
-            
-            const subject = encodeURIComponent('Message from ORBIT Rankings User');
-            const body = encodeURIComponent(`Name: ${name}\nJob Position: ${position}\nEmail: ${email}\n\nMessage:\n${message}`);
-            
-            window.location.href = `mailto:ssaab@lau.edu.lb?subject=${subject}&body=${body}`;
-        });
         
         // Data Loading
         window.addEventListener('DOMContentLoaded', async () => {
