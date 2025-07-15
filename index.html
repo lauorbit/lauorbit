@@ -181,6 +181,9 @@
                     <button id="tab-about" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
                         About
                     </button>
+                    <button id="tab-faq" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
+                        FAQ
+                    </button>
                     <button id="tab-contact" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
                         Contact Us
                     </button>
@@ -246,14 +249,23 @@
                     <li><strong>C:</strong> Journals that meet basic academic standards.</li>
                     <li><strong>D:</strong> Non-recommended journals.</li>
                 </ul>
-                <h3 class="lau-green">Percentile-Based Grading</h3>
-                <p>The letter grades are determined by percentile cutoffs derived from the overall score distribution:</p>
-                 <ul class="list-disc pl-5">
-                    <li><strong>D/C Boundary (15th percentile):</strong> 38.13</li>
-                    <li><strong>C/B Boundary (50th percentile):</strong> 58.60</li>
-                    <li><strong>B/A Boundary (85th percentile):</strong> 77.91</li>
-                    <li><strong>A/A+ Boundary (97th percentile):</strong> 97.58</li>
-                </ul>
+                <h3 class="lau-green">Grade Distribution</h3>
+                 <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2 border">Grade</th>
+                            <th class="p-2 border">Count</th>
+                            <th class="p-2 border">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="p-2 border">A+</td><td class="p-2 border">1098</td><td class="p-2 border">4.67%</td></tr>
+                        <tr><td class="p-2 border">A</td><td class="p-2 border">2684</td><td class="p-2 border">11.43%</td></tr>
+                        <tr><td class="p-2 border">B</td><td class="p-2 border">14242</td><td class="p-2 border">60.64%</td></tr>
+                        <tr><td class="p-2 border">C</td><td class="p-2 border">2514</td><td class="p-2 border">10.70%</td></tr>
+                        <tr><td class="p-2 border">D</td><td class="p-2 border">2950</td><td class="p-2 border">12.56%</td></tr>
+                    </tbody>
+                 </table>
                 <h3 class="lau-green">Source Rankings</h3>
                 <p>ORBIT only includes journals which are ranked by at least two of our used rankings/lists. We currently use the following expert-based rankings/lists:</p>
                 <ul class="list-disc pl-5">
@@ -270,6 +282,19 @@
                 <p>We also use the <a href="http://arc.gov.au/manage-your-grant/classification-codes-rfcd-seo-and-anzsic-codes" target="_blank" class="text-lau-green hover:underline">Australian and New Zealand Standard Research Classification (ANZSRC)</a> to indicate the Field of Research of each journal.</p>
             </div>
             
+            <!-- FAQ Section -->
+            <div id="panel-faq" class="hidden prose max-w-none">
+                <h2 class="lau-green">Frequently Asked Questions</h2>
+                <h3 class="lau-green">Why isn't an ORBIT rank provided for a specific journal?</h3>
+                <p>ORBIT only assigns a rank to journals that are evaluated by at least two of the international ranking systems we use. This approach ensures a more balanced and reliable score but may exclude some journals. If you believe a journal meets this criterion and is missing a rank, please let us know through the "Contact Us" form.</p>
+                <h3 class="lau-green">How often is ORBIT updated?</h3>
+                <p>We update the ORBIT rankings whenever one of the source ranking systems releases an updated list. This process typically takes one to two weeks to complete.</p>
+                <h3 class="lau-green">Why isn't a specific ranking system included in ORBIT?</h3>
+                <p>Our methodology requires that we only include expert-based ranking systems that are actively maintained. If you know of a ranking that fits this description and is not on our list, please reach out to us via the "Contact Us" form.</p>
+                <h3 class="lau-green">Does ORBIT include conferences?</h3>
+                <p>Currently, ORBIT focuses exclusively on journals. We are planning to include conference rankings in future iterations of the system.</p>
+            </div>
+
             <!-- Contact Us Section -->
             <div id="panel-contact" class="hidden">
                  <p class="text-gray-600 mb-6">Have an issue, question or suggestion? Please use the form below to get in touch.</p>
@@ -302,10 +327,12 @@
         const tabJournalSearch = document.getElementById('tab-journal-search');
         const tabFilterSearch = document.getElementById('tab-filter-search');
         const tabAbout = document.getElementById('tab-about');
+        const tabFaq = document.getElementById('tab-faq');
         const tabContact = document.getElementById('tab-contact');
         const panelJournalSearch = document.getElementById('panel-journal-search');
         const panelFilterSearch = document.getElementById('panel-filter-search');
         const panelAbout = document.getElementById('panel-about');
+        const panelFaq = document.getElementById('panel-faq');
         const panelContact = document.getElementById('panel-contact');
 
         // App State
@@ -329,21 +356,6 @@
                 /\w\S*/g,
                 (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
             );
-        };
-        
-        const levenshteinDistance = (a, b) => {
-            const an = a ? a.length : 0, bn = b ? b.length : 0;
-            if (an === 0) return bn; if (bn === 0) return an;
-            const matrix = Array.from({ length: bn + 1 }, () => Array(an + 1).fill(0));
-            for (let i = 0; i <= an; i++) matrix[0][i] = i;
-            for (let j = 0; j <= bn; j++) matrix[j][0] = j;
-            for (let j = 1; j <= bn; j++) {
-                for (let i = 1; i <= an; i++) {
-                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-                    matrix[j][i] = Math.min(matrix[j][i - 1] + 1, matrix[j - 1][i] + 1, matrix[j - 1][i - 1] + cost);
-                }
-            }
-            return matrix[bn][an];
         };
         
         const showInfoModal = (message) => {
@@ -408,7 +420,8 @@
             const businessRanking = journal.SpecialCalcFlag == 1 ? 'Included' : 'Excluded';
             const score = parseFloat(journal.Score_Uncertainty);
             const uncertaintyScore = !isNaN(score) ? score.toFixed(1) : 'N/A';
-            const rankDWarning = journal.LAU_ORBIT_Rank === 'D' ? `<p class="mt-2 p-2 bg-red-100 text-red-700 rounded-md text-sm"><strong>Warning:</strong> You are highly recommended not to publish in this journal.</p>` : '';
+            const rankDMessage = journal.LAU_ORBIT_Rank === 'D' ? `<p class="mt-2 text-red-600">You are recommended not to publish in this journal.</p>` : '';
+            const onWarningListMessage = journal.OnWarningList === 'Yes' ? `<p class="mt-2 p-2 bg-red-100 text-red-700 rounded-md text-sm"><strong>Warning:</strong> This journal is on the Early Warning List.</p>` : '';
             
             const infoIconSvg = `<svg class="info-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>`;
 
@@ -428,6 +441,8 @@
                             <p><strong>ISSN1:</strong> ${formatValue(journal.ISSN1)}</p>
                             <p><strong>ISSN2:</strong> ${formatValue(journal.ISSN2)}</p>
                             <p><strong>Publisher:</strong> ${formatValue(journal.Publisher)}</p>
+                            <p><strong>Open Access:</strong> ${formatValue(journal.Is_OA)}</p>
+                            <p><strong>Homepage:</strong> ${journal.Homepage ? `<a href="${journal.Homepage}" target="_blank" class="text-lau-green hover:underline">Click here</a>` : 'N/A'}</p>
                             <div class="pt-2">
                                 <h4 class="font-bold text-gray-700">Field of Research (FoR)<span onclick="showInfoModal('Field of Research (FoR) as classified by the widely used Australian and New Zealand Standard Research Classification (ANZSRC).')">${infoIconSvg}</span></h4>
                                 ${forCodesHtml || '<p>N/A</p>'}
@@ -435,7 +450,8 @@
                         </div>
                     </div>
                 </div>
-                ${rankDWarning}
+                ${rankDMessage}
+                ${onWarningListMessage}
             `;
             return contentWrapper;
         };
@@ -608,6 +624,7 @@
                 journal: { button: tabJournalSearch, panel: panelJournalSearch },
                 filter: { button: tabFilterSearch, panel: panelFilterSearch },
                 about: { button: tabAbout, panel: panelAbout },
+                faq: { button: tabFaq, panel: panelFaq },
                 contact: { button: tabContact, panel: panelContact }
             };
             Object.values(tabs).forEach(({ button, panel }) => {
@@ -631,6 +648,7 @@
         tabJournalSearch.addEventListener('click', () => switchTab('journal'));
         tabFilterSearch.addEventListener('click', () => switchTab('filter'));
         tabAbout.addEventListener('click', () => switchTab('about'));
+        tabFaq.addEventListener('click', () => switchTab('faq'));
         tabContact.addEventListener('click', () => switchTab('contact'));
         
         // Data Loading
