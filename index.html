@@ -495,12 +495,10 @@
             }).join('');
 
             const eliteStatus = journal.IsElite == 1 ? 'Yes' : 'No';
-            const warningStatus = journal.OnWarningList || 'No';
+            const warningStatusDisplay = journal.OnWarningList === 'Yes' ? '<span class="text-red-600 font-semibold">Yes</span>' : 'No';
             const businessRanking = journal.SpecialCalcFlag == 1 ? 'Included' : 'Excluded';
             const score = parseFloat(journal.Score_Uncertainty);
             const uncertaintyScore = !isNaN(score) ? score.toFixed(1) : 'N/A';
-            const rankDMessage = journal.LAU_ORBIT_Rank === 'D' ? `<p class="mt-2 text-red-600">You are recommended not to publish in this journal.</p>` : '';
-            const onWarningListMessage = journal.OnWarningList === 'Yes' ? `<p class="mt-2 p-2 bg-red-100 text-red-700 rounded-md text-sm"><strong>Warning:</strong> This journal is on the Early Warning List.</p>` : '';
             
             const infoIconSvg = `<svg class="info-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>`;
 
@@ -510,7 +508,7 @@
                         <div>
                             <p><strong>LAU ORBIT Rank:</strong> <span class="lau-green font-semibold">${formatValue(journal.LAU_ORBIT_Rank)}</span></p>
                             <p><strong>Elite Journal<span onclick="showInfoModal('This indicates if the journal is currently listed in the ARWU Shanghai, FT50, Nature Index, or UTD24 lists.')">${infoIconSvg}</span>:</strong> ${eliteStatus}</p>
-                            <p><strong>Warning List<span onclick="showInfoModal('This indicates if the journal is listed in the Early Warning List published by the Chinese Academy of Sciences.')">${infoIconSvg}</span>:</strong> ${warningStatus}</p>
+                            <p><strong>Warning List<span onclick="showInfoModal('This indicates if the journal is listed in the Early Warning List published by the Chinese Academy of Sciences.')">${infoIconSvg}</span>:</strong> ${warningStatusDisplay}</p>
                             <p><strong>Norwegian Level:</strong> ${formatValue(journal.NorwegianLevel)}</p>
                             ${otherRanksHtml}
                              <p><strong>Business Rankings<span onclick="showInfoModal('This indicates if the LAU ORBIT Rank is taking into account ABDC, AJG, FNEGE, and VHB. These rankings are only used for journals primarily focused on business, economics, and finance.')">${infoIconSvg}</span>:</strong> ${businessRanking}</p>
@@ -529,8 +527,6 @@
                         </div>
                     </div>
                 </div>
-                ${rankDMessage}
-                ${onWarningListMessage}
             `;
             return contentWrapper;
         }
@@ -595,8 +591,8 @@
 
             if (isIssn) {
                 results = journalData.filter(j => {
-                    const issn1 = String(j.ISSN1 || '').replace('-', '');
-                    const issn2 = String(j.ISSN2 || '').replace('-', '');
+                    const issn1 = String(j.ISSN1 || '').replace('-', '').toLowerCase();
+                    const issn2 = String(j.ISSN2 || '').replace('-', '').toLowerCase();
                     const queryIssn = query.replace('-', '');
                     return issn1 === queryIssn || issn2 === queryIssn;
                 });
