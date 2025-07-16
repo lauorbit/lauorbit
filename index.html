@@ -16,6 +16,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Library to read XLSX files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Fuse.js for fuzzy searching -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <!-- Tom-Select for multi-select dropdowns -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
@@ -369,58 +371,55 @@
 
         // App State
         let journalData = [];
+        let fuse;
         let tomSelectInstances = {};
 
         // --- Utility Functions ---
-function toTitleCase(str) {
-    if (!str || typeof str !== 'string') return '';
+        function toTitleCase(str) {
+            if (!str || typeof str !== 'string') return '';
+            const articles = ['a', 'an', 'the'];
+            const conjunctions = ['and', 'but', 'or', 'nor', 'for', 'so', 'yet'];
+            const prepositions = ['in', 'on', 'at', 'to', 'of', 'by', 'for', 'from', 'with', 'as'];
+            const smallWords = new Set([...articles, ...conjunctions, ...prepositions]);
 
-    const articles = ['a', 'an', 'the'];
-    const conjunctions = ['and', 'but', 'or', 'nor', 'for', 'so', 'yet'];
-    const prepositions = ['in', 'on', 'at', 'to', 'of', 'by', 'for', 'from', 'with', 'as'];
-    const smallWords = new Set([...articles, ...conjunctions, ...prepositions]);
+            return str.split(' ').map((word, index, arr) => {
+                const lowerWord = word.toLowerCase();
+                const isAllCaps = /^[A-Z]{2,}$/.test(word);
 
-    return str.split(' ').map((word, index, arr) => {
-        const isAllCaps = /^[A-Z]{2,}$/.test(word);
-        const lowerWord = word.toLowerCase();
+                if (index === 0 || index === arr.length - 1) {
+                    return isAllCaps ? word : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }
 
-        if (index === 0 || index === arr.length - 1) {
-            return isAllCaps ? word : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                if (isAllCaps) {
+                    return word;
+                }
+
+                if (smallWords.has(lowerWord)) {
+                    return lowerWord;
+                }
+
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            }).join(' ');
         }
 
-        if (isAllCaps) {
-            return word;
+        function toTitleCaseStrict(str) {
+            if (!str || typeof str !== 'string') return '';
+             const articles = ['a', 'an', 'the'];
+            const conjunctions = ['and', 'but', 'or', 'nor', 'for', 'so', 'yet'];
+            const prepositions = ['in', 'on', 'at', 'to', 'of', 'by', 'for', 'from', 'with', 'as'];
+            const smallWords = new Set([...articles, ...conjunctions, ...prepositions]);
+            
+            return str.split(' ').map((word, index, arr) => {
+                 const lowerWord = word.toLowerCase();
+                if (index === 0 || index === arr.length - 1) {
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }
+                 if (smallWords.has(lowerWord)) {
+                    return lowerWord;
+                }
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            }).join(' ');
         }
-
-        if (smallWords.has(lowerWord)) {
-            return lowerWord;
-        }
-
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-    }).join(' ');
-}
-
-
-function toTitleCaseStrict(str) {
-    if (!str || typeof str !== 'string') return '';
-
-    const articles = ['a', 'an', 'the'];
-    const conjunctions = ['and', 'but', 'or', 'nor', 'for', 'so', 'yet'];
-    const prepositions = ['in', 'on', 'at', 'to', 'of', 'by', 'for', 'from', 'with', 'as'];
-    const smallWords = new Set([...articles, ...conjunctions, ...prepositions]);
-
-    return str
-        .toLowerCase()
-        .split(' ')
-        .map((word, index, arr) => {
-            if (smallWords.has(word) && index !== 0 && index !== arr.length - 1) {
-                return word;
-            }
-            return word.charAt(0).toUpperCase() + word.slice(1);
-        })
-        .join(' ');
-}
-
         
         function levenshteinDistance(a, b) {
             if (!a || !b) return 99;
@@ -584,79 +583,28 @@ function toTitleCaseStrict(str) {
             return card;
         }
 
-        function normalize(str) {
-    return str.toLowerCase().replace(/^(the|a|an|)\s+/i, '').trim();
-}
+        // --- Search and Filter Logic ---
+        function handleSearch() {
+            const query = journalInput.value.trim().toLowerCase();
+            if (!query) {
+                displayFullDetailCards([]);
+                return;
+            }
+            const isIssn = /^\d{4}-?\d{3}[\dxX]$/.test(query);
+            let results = [];
 
-function handleSearch() {
-    const query = journalInput.value.trim().toLowerCase();
-    if (!query) {
-        displayFullDetailCards([]);
-        return;
-    }
-    const normalizedQuery = normalize(query);
-    const isIssn = /^\d{4}-?\d{3}[\dxX]$/.test(query);
-    let results = [];
-
-    if (isIssn) {
-        results = journalData.filter(j => {
-            const issn1 = String(j.ISSN1 || '').replace('-', '');
-            const issn2 = String(j.ISSN2 || '').replace('-', '');
-            const queryIssn = query.replace('-', '');
-            return issn1 === queryIssn || issn2 === queryIssn;
-        });
-    } else {
-        results = journalData
-            .map(journal => {
-                if (!journal.JournalName) return null;
-                const name = journal.JournalName.toLowerCase();
-                const normalizedName = normalize(name);
-
-                const exactMatch = name === query;
-                const normalizedExact = normalizedName === normalizedQuery;
-                const startsWith = name.startsWith(query);
-                const wordStartsWith = name.split(' ').some(word => word.startsWith(query));
-                const contains = name.includes(query);
-                const queryContainsName = normalizedQuery.includes(normalizedName);
-
-                let score = 99;
-                if (exactMatch) {
-                    score = 1;
-                } else if (normalizedExact) {
-                    score = 2;
-                } else if (startsWith) {
-                    score = 3;
-                } else if (wordStartsWith) {
-                    score = 4;
-                } else if (contains) {
-                    score = 5;
-                } else if (queryContainsName) {
-                    score = 6;
-                }
-
-                // Allow typos within each rank (except exact match)
-                const typoScore = levenshteinDistance(name, query);
-                const normalizedTypoScore = levenshteinDistance(normalizedName, normalizedQuery);
-
-                if (!exactMatch && (typoScore <= 2 || normalizedTypoScore <= 2)) {
-                    if (score > 6) score = 7; // fallback if no structured match, but typo-close
-                }
-
-                if (score < 99) {
-                    return { ...journal, score, typoScore };
-                }
-                return null;
-            })
-            .filter(Boolean)
-            .sort((a, b) => {
-                if (a.score !== b.score) return a.score - b.score;
-                if ((a.typoScore ?? 0) !== (b.typoScore ?? 0)) return (a.typoScore ?? 0) - (b.typoScore ?? 0);
-                return (a.JournalName || '').localeCompare(b.JournalName || '');
-            });
-    }
-    displayFullDetailCards(results);
-}
-
+            if (isIssn) {
+                results = journalData.filter(j => {
+                    const issn1 = String(j.ISSN1 || '').replace('-', '');
+                    const issn2 = String(j.ISSN2 || '').replace('-', '');
+                    const queryIssn = query.replace('-', '');
+                    return issn1 === queryIssn || issn2 === queryIssn;
+                });
+            } else {
+                results = fuse.search(query).map(r => r.item);
+            }
+            displayFullDetailCards(results);
+        }
 
         function handleFilter() {
             const selectedRanks = tomSelectInstances.ranks.getValue();
@@ -797,6 +745,16 @@ function handleSearch() {
                 const workbook = XLSX.read(chunksAll.buffer, {type: 'buffer'});
                 journalData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
                 
+                // Initialize Fuse.js
+                const options = {
+                    includeScore: true,
+                    keys: ['JournalName'],
+                    threshold: 0.4,
+                    ignoreLocation: true,
+                    findAllMatches: true,
+                };
+                fuse = new Fuse(journalData, options);
+
                 document.getElementById('loading-container').remove();
                 tabContainer.classList.remove('hidden');
                 panelJournalSearch.classList.remove('hidden');
