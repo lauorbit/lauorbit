@@ -259,37 +259,54 @@
             <!-- About Section -->
             <div id="panel-about" class="hidden prose max-w-none">
                 <h2 class="lau-green">About the LAU ORBIT Ranking</h2>
-                <p>This tool provides access to the Objective Ranking by Bayesian Integrated Tiers (ORBIT), a comprehensive system designed to offer a stable and holistic view of academic journal quality.</p>
+                <p>This tool provides access to the Objective Ranking through Bias-reduced Integrated Tiers (ORBIT), a comprehensive system designed to offer a stable and holistic view of academic journal quality.</p>
                 <p>ORBIT synthesizes the expert opinions of six major international ranking systems to produce a single consensus grade and an "uncertainy score" that measures the level of agreement among the sources.</p>
                 <p>To find a journal, you can search by its name, ISSN, or browse by field of research using the standardized <a href="https://www.arc.gov.au/manage-your-grant/classification-codes-rfcd-seo-and-anzsic-codes" target="_blank" class="hyperlink">Australian and New Zealand Standard Research Classification (ANZSRC) codes<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a>. Our goal is to provide a robust, transparent, and easy-to-use guide for scholars, researchers, and academic institutions.</p>
                 
-                <h3 class="lau-green mt-6">Letter Grade System</h3>
-                <p>Journals are assigned a letter grade based on their calculated score, reflecting their standing within the academic community.</p>
-                <ul class="list-disc pl-5">
-                    <li><strong>A+:</strong> Represents journals of the highest tier, either by achieving a top percentile score or by being on the consolidated Elite List. Indicates universal recognition as a leading journal.</li>
-                    <li><strong>A:</strong> Denotes journals of excellent quality that fall just below the elite tier. These are highly-regarded publications with a strong consensus.</li>
-                    <li><strong>B:</strong> Represents the broad, central tier of reputable and recognized academic journals. The majority of journals fall into this category.</li>
-                    <li><strong>C:</strong> Indicates journals that are recognized but fall below the median quality level of the overall academic landscape.</li>
-                    <li><strong>D:</strong> Represents journals of the lowest tier, either by falling in the bottom percentile or by being on the CAS Warning List. This grade suggests significant quality or integrity concerns.</li>
-                </ul>
-                <h3 class="lau-green mt-6">Grade Distribution</h3>
+                <h3 class="lau-green mt-6">Grade Distribution and Meaning</h3>
                  <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-100">
                             <th class="p-2 border">Grade</th>
                             <th class="p-2 border">Count</th>
                             <th class="p-2 border">Percentage</th>
+                            <th class="p-2 border">Meaning</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td class="p-2 border">A+</td><td class="p-2 border">1098</td><td class="p-2 border">4.67%</td></tr>
-                        <tr><td class="p-2 border">A</td><td class="p-2 border">2684</td><td class="p-2 border">11.43%</td></tr>
-                        <tr><td class="p-2 border">B</td><td class="p-2 border">14242</td><td class="p-2 border">60.64%</td></tr>
-                        <tr><td class="p-2 border">C</td><td class="p-2 border">2514</td><td class="p-2 border">10.70%</td></tr>
-                        <tr><td class="p-2 border">D</td><td class="p-2 border">2950</td><td class="p-2 border">12.56%</td></tr>
+                        <tr>
+                            <td class="p-2 border align-top">A+</td>
+                            <td class="p-2 border align-top">1098</td>
+                            <td class="p-2 border align-top">4.67%</td>
+                            <td class="p-2 border">Represents journals of the highest tier, either by achieving a top percentile score or by being on the consolidated Elite List. Indicates universal recognition as a leading journal.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border align-top">A</td>
+                            <td class="p-2 border align-top">2684</td>
+                            <td class="p-2 border align-top">11.43%</td>
+                            <td class="p-2 border">Denotes journals of excellent quality that fall just below the elite tier. These are highly-regarded publications with a strong consensus.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border align-top">B</td>
+                            <td class="p-2 border align-top">14242</td>
+                            <td class="p-2 border align-top">60.64%</td>
+                            <td class="p-2 border">Represents the broad, central tier of reputable and recognized academic journals. The majority of journals fall into this category.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border align-top">C</td>
+                            <td class="p-2 border align-top">2514</td>
+                            <td class="p-2 border align-top">10.70%</td>
+                            <td class="p-2 border">Indicates journals that are recognized but fall below the median quality level of the overall academic landscape.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border align-top">D</td>
+                            <td class="p-2 border align-top">2950</td>
+                            <td class="p-2 border align-top">12.56%</td>
+                            <td class="p-2 border">Represents journals of the lowest tier, either by falling in the bottom percentile or by being on the CAS Warning List. This grade suggests significant quality or integrity concerns.</td>
+                        </tr>
                     </tbody>
-                 </table>
-                 <img src="https://raw.githubusercontent.com/lauorbit/lauorbit.github.io/refs/heads/main/PDF.png" alt="Probability Density Functions of Ranking System Scores" class="mx-auto my-6 w-full max-w-2xl">
+                </table>
+                <img src="https://raw.githubusercontent.com/lauorbit/lauorbit.github.io/refs/heads/main/PDF.png" alt="Probability Density Functions of Ranking System Scores" class="mx-auto my-6 w-full max-w-2xl">
                 <h3 class="lau-green mt-6">Source Rankings</h3>
                 <p>ORBIT only includes journals which are ranked by at least two of our used rankings/lists. We currently use the following expert-based rankings/lists:</p>
                 <ul class="list-disc pl-5">
@@ -798,7 +815,7 @@
             },
             {
                 group: 'faq-group-2',
-                question: `❓ How should I interpret the "Score Uncertainty"?`,
+                question: `❓How should I interpret the "Score Uncertainty"?`,
                 answer: `The Score Uncertainty measures how much the different ranking systems disagree about a journal's quality. A low score (e.g., below 5) is excellent. It indicates a strong consensus, meaning the ORBIT grade is very reliable. A high score (e.g., above 20) is a warning flag. It means the ranking systems have conflicting opinions, so while the ORBIT grade represents the mathematical average, it should be interpreted with caution.`
             },
             {
