@@ -25,6 +25,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Combined fonts for the main page and the animation -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&family=Raleway:wght@400;500;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <!-- MathJax for LaTeX rendering -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
     <style>
         body {
             font-family: 'PT Sans', sans-serif;
@@ -97,7 +112,7 @@
         }
         .ts-wrapper.multi .ts-control {
             max-height: 5.5rem; /* Limits the height to ~2-3 rows */
-            overflow-y: auto;   /* Allows scrolling for more items */
+            overflow-y: auto;    /* Allows scrolling for more items */
         }
         .ts-control .ts-input {
             font-family: 'PT Sans', sans-serif;
@@ -193,7 +208,7 @@
     <div class="container mx-auto p-4 sm:p-6 md:p-8">
         <!-- Header -->
         <header class="text-center mb-8">
-            <img src="https://100.lau.edu.lb/images/LAU_Centennial_Primary_Logo_RGB_full_colors.png" alt="LAU Logo" class="h-28 mx-auto" onerror="this.onerror=null;this.src='https://www.lau.edu.lb/2022/images/lau-logo-text-black.png';">
+            <!-- The LAU Logo image has been removed from here -->
             
             <!-- START: Inserted ORBIT Animation -->
             <div class="icon-container">
@@ -874,9 +889,31 @@
             resultsContainer.innerHTML = '';
             paginationContainer.innerHTML = '';
             currentSearchResults = [];
+            // Re-render MathJax if the FAQ tab is selected
+            if (activeTab === 'faq' && window.MathJax) {
+                MathJax.typesetPromise();
+            }
         }
         
+        // --- FAQ DATA and POPULATION ---
         const faqData = [
+            // NEW FAQs ADDED HERE
+             {
+                group: 'faq-group-1',
+                question: '❓ Why does ORBIT convert continuous scores into letter grades, and what are the trade-offs?',
+                answer: `Although ORBIT generates a continuous score for each journal, it is quantized into five letter grades (A+, A, B, C, D) to support clearer decision-making in academic evaluation and policy. This five-grade system strikes a balance between simplicity and informativeness. The main benefit is that it offers an easily interpretable summary of a journal's standing. However, this quantization also leads to a loss of detail—two journals with different ORBIT scores might fall into the same grade category. To mitigate this, ORBIT provides a continuous uncertainty score that should be used alongside the letter grade, especially for journals near grade boundaries or with high uncertainty. The fewer the grade levels, the more important it is to consider this uncertainty for a more accurate assessment.`
+            },
+            {
+                group: 'faq-group-1',
+                question: '❓ Can you provide more context on why citation-based metrics are considered problematic?',
+                answer: `Citation-based metrics—such as the h-index, CiteScore, and SNIP—are widely used but suffer from both practical and conceptual flaws. A striking example comes from the 2025 Google Scholar venue rankings, which place <i>IEEE Access</i> and MDPI’s <i>Sustainability</i> among the top 30 journals worldwide—ranking them above <i>Nature Medicine</i>, <i>JACS</i>, and <i>BMJ</i>. This is despite the fact that these journals have been flagged by the Chinese Academy of Sciences and assigned the lowest rating by both JUFO and the Norwegian Register. In mathematics and physics, the situation is reversed: prestigious journals like the <i>Annals of Mathematics</i> are entirely unranked, while questionable titles like <i>Chaos, Solitons & Fractals</i> are prominently listed. This reflects a systemic bias toward citation volume rather than scholarly quality.<br><br>From a theoretical standpoint, these metrics also fail under the lens of statistical decision theory. If journal evaluation is treated as a hypothesis test—where the null hypothesis is that a journal is "not of high quality"—then a reliable metric should minimize both Type I errors (false positives) and Type II errors (false negatives). Citation-based systems are prone to both. For instance, CiteScore places over 130 MDPI journals in the top quartile, including <i>Cells</i>, which appears on the Early Warning List issued by the Chinese Academy of Sciences. Yet expert-based systems like ORBIT assign none of these journals top grades, with most receiving a ‘D’. At the same time, citation metrics tend to penalize respected but slower-citing journals like <i>MIT Sloan Management Review</i>, which ranks poorly despite being on the FT50 list. These inconsistencies highlight how citation-based rankings can mislead real-world decisions in tenure, funding, and evaluation.`
+            },
+             {
+                group: 'faq-group-1',
+                question: '❓ How does ORBIT perform compared to existing journal ranking systems?',
+                answer: `ORBIT consistently outperforms individual ranking systems in both stability and accuracy. By aggregating multiple expert-based lists through a reliability-weighted, pessimistic approach, it generates a consensus score that reflects the central point of agreement across systems. Our internal coherence analysis shows that ORBIT’s average error against a simple consensus is nearly ten times lower than that of the next-best system—demonstrating that it is not just a compromise, but a statistically superior representation. Its final score distribution is also less volatile and more centrally peaked, offering a more reliable and defensible measure of a journal’s overall standing.`
+            },
+            // EXISTING FAQs
             {
                 group: 'faq-group-1',
                 question: '❓ What is the main goal of the ORBIT system?',
