@@ -1,1097 +1,1040 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORBIT</title>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDD4JMS2G3"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'G-HDD4JMS2G3');
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library to read XLSX files -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Fuse.js for fuzzy searching -->
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-    <!-- Tom-Select for multi-select dropdowns -->
-    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Combined fonts for the main page and the animation -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&family=Raleway:wght@400;500;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <!-- MathJax for LaTeX rendering -->
-    <script>
-      MathJax = {
-        tex: {
-          inlineMath: [['$', '$'], ['\\(', '\\)']],
-          displayMath: [['$$', '$$'], ['\\[', '\\]']]
-        },
-        svg: {
-          fontCache: 'global'
-        }
-      };
-    </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <style>
-        body {
-            font-family: 'PT Sans', sans-serif;
-            background-color: #f4f4f5; /* A light gray background */
-        }
-        .lau-green {
-            color: #006751;
-        }
-        .bg-lau-green {
-            background-color: #006751;
-        }
-        .border-lau-green {
-            border-color: #006751;
-        }
-        h1, h2, h3, h4 {
-            font-family: 'Raleway', sans-serif;
-        }
-        .tab-button {
-            transition: all 0.3s ease;
-            border-bottom-width: 4px; /* Set a consistent border width */
-        }
-        .tab-button.active {
-            border-color: #006751;
-            background-color: #006751;
-            color: white;
-        }
-        /* Keep active tab text white on hover */
-        .tab-button.active:hover {
-            color: white;
-        }
-        /* Style for inactive tabs on hover */
-        .tab-button:not(.active):hover {
-            color: #374151; /* Darker text */
-            border-color: #006751; /* Green border */
-        }
-        .search-input::placeholder {
-            color: #9ca3af;
-            font-style: italic;
-        }
-        .result-card {
-            border-left: 5px solid #006751;
-        }
-        .filter-label {
-            font-weight: 500;
-            color: #374151;
-            font-family: 'Raleway', sans-serif;
-        }
-        .summary-item {
-            cursor: pointer;
-            transition: background-color 0.2s, border-radius 0.2s;
-        }
-        .summary-item:hover {
-            background-color: #f9fafb;
-        }
-        #progress-bar {
-            transition: width 0.3s ease-in-out;
-        }
-        /* Tom-Select Styles with SVG Arrow */
-        .ts-control, .custom-select-arrow {
-            border-radius: 0.375rem;
-            border-color: #d1d5db;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem !important;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
-        .ts-wrapper.multi .ts-control {
-            max-height: 5.5rem; /* Limits the height to ~2-3 rows */
-            overflow-y: auto;    /* Allows scrolling for more items */
-        }
-        .ts-control .ts-input {
-            font-family: 'PT Sans', sans-serif;
-        }
-        .ts-dropdown {
-            font-family: 'PT Sans', sans-serif;
-        }
-        .info-icon, .link-icon {
-            display: inline-block;
-            width: 1.1rem;
-            height: 1.1rem;
-            margin-left: 0.35rem;
-            cursor: pointer;
-            vertical-align: middle;
-        }
-        .hyperlink {
-            color: #2563eb;
-        }
-        .hyperlink .link-icon {
-            color: #2563eb;
-        }
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 0.5rem;
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-        }
-        .modal-close {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            color: #6b7280;
-        }
-        /* Clear button for search input */
-        .clear-search {
-            position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #9ca3af;
-            display: none; /* Hidden by default */
-        }
-        .search-input-wrapper:focus-within .clear-search,
-        .search-input-wrapper .search-input:not(:placeholder-shown) + .clear-search {
-            display: block;
-        }
-        /* FAQ Accordion Styles */
-        .faq-question.active .faq-arrow {
-            transform: rotate(180deg);
-        }
-
-        /* --- Styles for the ORBIT Animation --- */
-        .icon-container {
-            width: 250px; /* Adjusted size for better integration */
-            height: 250px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 1.5rem auto; /* Vertical margin and horizontal centering */
-            background-color: #0a0a1a; /* Dark space blue background needed for the glow effect */
-            border-radius: 0.75rem; /* Rounded corners to match site aesthetic */
-            box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
-        }
-        .satellite-label {
-            font-family: 'Inter', sans-serif;
-            font-size: 10px;
-            fill: #a0a0b0;
-            text-anchor: middle;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORBIT</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDD4JMS2G3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-HDD4JMS2G3');
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Library to read XLSX files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Fuse.js for fuzzy searching -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <!-- Tom-Select for multi-select dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Combined fonts for the main page and the animation -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&family=Raleway:wght@400;500;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <!-- MathJax for LaTeX rendering -->
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    <style>
+        body {
+            font-family: 'PT Sans', sans-serif;
+            background-color: #f4f4f5; /* A light gray background */
+        }
+        .lau-green {
+            color: #006751;
+        }
+        .bg-lau-green {
+            background-color: #006751;
+        }
+        .border-lau-green {
+            border-color: #006751;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Raleway', sans-serif;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom-width: 4px; /* Set a consistent border width */
+        }
+        .tab-button.active {
+            border-color: #006751;
+            background-color: #006751;
+            color: white;
+        }
+        /* Keep active tab text white on hover */
+        .tab-button.active:hover {
+            color: white;
+        }
+        /* Style for inactive tabs on hover */
+        .tab-button:not(.active):hover {
+            color: #374151; /* Darker text */
+            border-color: #006751; /* Green border */
+        }
+        .search-input::placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+        .result-card {
+            border-left: 5px solid #006751;
+        }
+        .filter-label {
+            font-weight: 500;
+            color: #374151;
+            font-family: 'Raleway', sans-serif;
+        }
+        .summary-item {
+            cursor: pointer;
+            transition: background-color 0.2s, border-radius 0.2s;
+        }
+        .summary-item:hover {
+            background-color: #f9fafb;
+        }
+        #progress-bar {
+            transition: width 0.3s ease-in-out;
+        }
+        /* Tom-Select Styles with SVG Arrow */
+        .ts-control, .custom-select-arrow {
+            border-radius: 0.375rem;
+            border-color: #d1d5db;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem !important;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .ts-wrapper.multi .ts-control {
+            max-height: 5.5rem; /* Limits the height to ~2-3 rows */
+            overflow-y: auto;    /* Allows scrolling for more items */
+        }
+        .ts-control .ts-input {
+            font-family: 'PT Sans', sans-serif;
+        }
+        .ts-dropdown {
+            font-family: 'PT Sans', sans-serif;
+        }
+        .info-icon, .link-icon {
+            display: inline-block;
+            width: 1.1rem;
+            height: 1.1rem;
+            margin-left: 0.35rem;
+            cursor: pointer;
+            vertical-align: middle;
+        }
+        .hyperlink {
+            color: #2563eb;
+        }
+        .hyperlink .link-icon {
+            color: #2563eb;
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        /* Clear button for search input */
+        .clear-search {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #9ca3af;
+            display: none; /* Hidden by default */
+        }
+        .search-input-wrapper:focus-within .clear-search,
+        .search-input-wrapper .search-input:not(:placeholder-shown) + .clear-search {
+            display: block;
+        }
+        /* FAQ Accordion Styles */
+        .faq-question.active .faq-arrow {
+            transform: rotate(180deg);
+        }
+        /* --- Styles for the ORBIT Animation --- */
+        .icon-container {
+            width: 250px; /* Adjusted size for better integration */
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1.5rem auto; /* Vertical margin and horizontal centering */
+            background-color: #0a0a1a; /* Dark space blue background needed for the glow effect */
+            border-radius: 0.75rem; /* Rounded corners to match site aesthetic */
+            box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+        }
+        .satellite-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            fill: #a0a0b0;
+            text-anchor: middle;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
-
-    <div class="container mx-auto p-4 sm:p-6 md:p-8">
-        <!-- Header -->
-        <header class="text-center mb-8">
-            
-            <!-- START: Inserted ORBIT Animation -->
-            <div class="icon-container">
-                <svg width="100%" height="100%" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <!-- Glow filter effect -->
-                        <filter id="glow">
-                            <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
-                            <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                            </feMerge>
-                        </filter>
-                        <!-- Gradient for the central text -->
-                        <linearGradient id="orbitTextGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#005cff;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-    
-                    <!-- Central Text "ORBIT" -->
-                    <text x="200" y="200" dominant-baseline="central" text-anchor="middle" font-family="'Orbitron', sans-serif" font-size="48" font-weight="bold" fill="url(#orbitTextGradient)" filter="url(#glow)" letter-spacing="2">
-                        ORBIT
-                    </text>
-    
-                    <!-- Orbits and Satellites -->
-                    <!-- Each satellite is a group containing the path, the satellite circle, and its label -->
-    
-                    <!-- 1. JUFO (Closest) -->
-                    <g>
-                        <ellipse cx="200" cy="200" rx="80" ry="40" fill="none" stroke="#4A5568" stroke-width="0.5"/>
-                        <circle r="5" fill="#E53E3E">
-                            <animateMotion dur="10s" repeatCount="indefinite" path="M280,200 A80,40 0 1,0 120,200 A80,40 0 1,0 280,200" />
-                        </circle>
-                        <text x="280" y="190" class="satellite-label">JUFO</text>
-                    </g>
-    
-                    <!-- 2. Norwegian Register -->
-                    <g>
-                        <ellipse cx="200" cy="200" rx="100" ry="60" fill="none" stroke="#4A5568" stroke-width="0.5"/>
-                        <circle r="5" fill="#38A169">
-                            <animateMotion dur="12s" repeatCount="indefinite" path="M300,200 A100,60 0 1,0 100,200 A100,60 0 1,0 300,200" />
-                        </circle>
-                          <text x="100" y="215" class="satellite-label">Norwegian</text>
-                    </g>
-    
-                    <!-- 3. ABDC -->
-                    <g>
-                        <ellipse cx="200" cy="200" rx="125" ry="80" fill="none" stroke="#4A5568" stroke-width="0.5"/>
-                        <circle r="5" fill="#3182CE">
-                            <animateMotion dur="15s" repeatCount="indefinite" path="M325,200 A125,80 0 1,0 75,200 A125,80 0 1,0 325,200" />
-                        </circle>
-                        <text x="75" y="190" class="satellite-label">ABDC</text>
-                    </g>
-    
-                    <!-- 4. AJG -->
-                    <g>
-                        <ellipse cx="200" cy="200" rx="145" ry="100" fill="none" stroke="#4A5568" stroke-width="0.5"/>
-                        <circle r="5" fill="#DD6B20">
-                            <animateMotion dur="18s" repeatCount="indefinite" path="M345,200 A145,100 0 1,0 55,200 A145,100 0 1,0 345,200" />
-                        </circle>
-                          <text x="345" y="215" class="satellite-label">AJG</text>
-                    </g>
-    
-                    <!-- 5. VHB -->
-                    <g>
-                        <ellipse cx="200" cy="200" rx="170" ry="120" fill="none" stroke="#4A5568" stroke-width="0.5"/>
-                        <circle r="5" fill="#805AD5">
-                            <animateMotion dur="22s" repeatCount="indefinite" path="M370,200 A170,120 0 1,0 30,200 A170,120 0 1,0 370,200" />
-                        </circle>
-                        <text x="30" y="215" class="satellite-label">VHB</text>
-                    </g>
-    
-                    <!-- 6. FNEGE (Furthest) -->
-                    <g>
-                        <ellipse cx="200" cy="200" rx="190" ry="140" fill="none" stroke="#4A5568" stroke-width="0.5"/>
-                        <circle r="5" fill="#D53F8C">
-                            <animateMotion dur="25s" repeatCount="indefinite" path="M390,200 A190,140 0 1,0 10,200 A190,140 0 1,0 390,200" />
-                        </circle>
-                        <text x="200" y="350" class="satellite-label">FNEGE</text>
-                    </g>
-                </svg>
-            </div>
-            <!-- END: Inserted ORBIT Animation -->
-
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">ORBIT Rankings and Beyond</h1>
-            <p class="text-gray-600 mt-2">Your guide to journal rankings and classifications.</p>
-        </header>
-
-        <!-- Main Content -->
-        <main id="main-content" class="bg-white p-6 rounded-lg shadow-lg">
-            <!-- Tab Navigation -->
-            <div id="tab-container" class="mb-6 border-b border-gray-200 hidden">
-                <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
-                    <button id="tab-journal-search" class="tab-button active text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
-                        Search for a Journal
-                    </button>
-                    <button id="tab-filter-search" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
-                        Search by Field/Rank/Publisher
-                    </button>
-                    <button id="tab-about" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
-                        About
-                    </button>
-                    <button id="tab-faq" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
-                        FAQ
-                    </button>
-                    <button id="tab-contact" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
-                        Contact Us
-                    </button>
-                </nav>
-            </div>
-
-            <!-- Search by Journal Section -->
-            <div id="panel-journal-search" class="hidden">
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <div class="relative w-full search-input-wrapper">
-                        <input type="text" id="journal-input" class="search-input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lau-green" placeholder="Enter journal name or ISSN">
-                        <span id="clear-search-btn" class="clear-search">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </span>
-                    </div>
-                    <button id="search-btn" class="bg-lau-green text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition">Search</button>
-                </div>
-            </div>
-
-            <!-- Search by Field/Rank Section -->
-            <div id="panel-filter-search" class="hidden">
-                 <p class="text-gray-600 mb-4">Select one or more criteria to filter journals.</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
-                    <div class="flex flex-col">
-                        <label for="rank-select" class="filter-label mb-1">Rank(s)</label>
-                        <select id="rank-select" multiple></select>
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="for-name-select" class="filter-label mb-1">FoR Name(s)</label>
-                        <select id="for-name-select" multiple></select>
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="publisher-select" class="filter-label mb-1">Publisher(s)</label>
-                        <select id="publisher-select" multiple></select>
-                    </div>
-                     <div class="flex flex-col">
-                        <label for="open-access-select" class="filter-label mb-1">Open Access</label>
-                        <select id="open-access-select" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lau-green h-10 bg-white custom-select-arrow">
-                            <option value="All">All</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                        </select>
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="sort-select" class="filter-label mb-1">Sort by</label>
-                        <select id="sort-select" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lau-green h-10 bg-white custom-select-arrow">
-                            <option value="name-asc">Name (A-Z)</option>
-                            <option value="rank-asc">Rank (Ascending)</option>
-                            <option value="rank-desc">Rank (Descending)</option>
-                        </select>
-                    </div>
-                    <div class="flex gap-2">
-                        <button id="filter-btn" class="w-full bg-lau-green text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition h-10">Filter</button>
-                        <button id="reset-btn" class="w-full bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition h-10">Reset</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- About Section -->
-            <div id="panel-about" class="hidden prose max-w-none">
-                <h2 class="lau-green">About the ORBIT Ranking</h2>
-                <p>This tool provides access to the Objective Ranking through Bias-reduced Integrated Tiers (ORBIT), a comprehensive system designed to offer a stable and holistic view of academic journal quality.</p>
-                <p>ORBIT synthesizes the expert opinions of six major international ranking systems to produce a single consensus grade and an "uncertainy score" that measures the level of agreement among the sources.</p>
-                <p>To find a journal, you can search by its name, ISSN, or browse by field of research using the standardized <a href="https://www.arc.gov.au/manage-your-grant/classification-codes-rfcd-seo-and-anzsic-codes" target="_blank" class="hyperlink">Australian and New Zealand Standard Research Classification (ANZSRC) codes<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a>. Our goal is to provide a robust, transparent, and easy-to-use guide for scholars, researchers, and academic institutions.</p>
-                
-                <h3 class="lau-green mt-6">Grade Distribution and Meaning</h3>
-                 <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <th class="p-2 border">Grade</th>
-                            <th class="p-2 border">Count</th>
-                            <th class="p-2 border">Percentage</th>
-                            <th class="p-2 border">Meaning</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="p-2 border align-top">A+</td>
-                            <td class="p-2 border align-top">1098</td>
-                            <td class="p-2 border align-top">4.67%</td>
-                            <td class="p-2 border">Represents journals of the highest tier, either by achieving a top percentile score or by being on the consolidated Elite List. Indicates universal recognition as a leading journal.</td>
-                        </tr>
-                        <tr>
-                            <td class="p-2 border align-top">A</td>
-                            <td class="p-2 border align-top">2684</td>
-                            <td class="p-2 border align-top">11.43%</td>
-                            <td class="p-2 border">Denotes journals of excellent quality that fall just below the elite tier. These are highly-regarded publications with a strong consensus.</td>
-                        </tr>
-                        <tr>
-                            <td class="p-2 border align-top">B</td>
-                            <td class="p-2 border align-top">14242</td>
-                            <td class="p-2 border align-top">60.64%</td>
-                            <td class="p-2 border">Represents the broad, central tier of reputable and recognized academic journals. The majority of journals fall into this category.</td>
-                        </tr>
-                        <tr>
-                            <td class="p-2 border align-top">C</td>
-                            <td class="p-2 border align-top">2514</td>
-                            <td class="p-2 border align-top">10.70%</td>
-                            <td class="p-2 border">Indicates journals that are recognized but fall below the median quality level of the overall academic landscape.</td>
-                        </tr>
-                        <tr>
-                            <td class="p-2 border align-top">D</td>
-                            <td class="p-2 border align-top">2950</td>
-                            <td class="p-2 border align-top">12.56%</td>
-                            <td class="p-2 border">Represents journals of the lowest tier, either by falling in the bottom percentile or by being on the CAS Warning List. This grade suggests significant quality or integrity concerns.</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <img src="https://raw.githubusercontent.com/lauorbit/lauorbit.github.io/refs/heads/main/PDF.png" alt="Probability Density Functions of Ranking System Scores" class="mx-auto my-6 w-full max-w-2xl">
-                <h3 class="lau-green mt-6">Source Rankings</h3>
-                <p>ORBIT only includes journals which are ranked by at least two of our used rankings/lists. We currently use the following expert-based rankings/lists:</p>
-                <ul class="list-disc pl-5">
-                    <li><a href="https://abdc.edu.au/abdc-journal-quality-list/" target="_blank" class="hyperlink">ABDC<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                    <li><a href="https://charteredabs.org/academic-journal-guide" target="_blank" class="hyperlink">AJG<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                    <li><a href="https://www.shanghairanking.com/activities/aes" target="_blank" class="hyperlink">ARWU<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                    <li><a href="https://ewl.fenqubiao.com/#/en/early-warning-journal-list-2024" target="_blank" class="hyperlink">Early Warning Journal List<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                    <li><a href="https://fnege.org/en/fnege-journal-quality-list/" target="_blank" class="hyperlink">FNEGE<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                    <li><a href="https://www.ft.com/content/3405a512-5cbb-11e1-8f1f-00144feabdc0" target="_blank" class="hyperlink">FT50<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                    <li><a href="https://jfp.csc.fi/jufoportal" target="_blank" class="hyperlink">JUFO<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                    <li><a href="https://www.nature.com/nature-index/faq#journal-selection" target="_blank" class="hyperlink">Nature Index<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                    <li><a href="https://kanalregister.hkdir.no/en" target="_blank" class="hyperlink">Norwegian Register<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                    <li><a href="https://jsom.utdallas.edu/the-utd-top-100-business-school-research-rankings/search#rankingsByJournal" target="_blank" class="hyperlink">UTD24<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                    <li><a href="https://www.vhbonline.org/en/services/vhb-rating-2024" target="_blank" class="hyperlink">VHB<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
-                </ul>
-                <p>We also use <a href="https://openalex.org" target="_blank" class="hyperlink">OpenAlex<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a> to obtain non-ranking data (publisher, open access status, etc.).</p>
-            </div>
-            
-            <!-- FAQ Section -->
-            <div id="panel-faq" class="hidden space-y-4">
-                <div>
-                    <h2 class="text-xl font-bold lau-green">ORBIT Methodology</h2>
-                    <div class="space-y-2 mt-2" id="faq-group-1">
-                        <!-- FAQ items will be dynamically inserted here -->
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold lau-green mt-6">Using the ORBIT Rankings</h2>
-                    <div class="space-y-2 mt-2" id="faq-group-2">
-                        <!-- FAQ items will be dynamically inserted here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contact Us Section -->
-            <div id="panel-contact" class="hidden">
-                 <p class="text-gray-600 mb-6">Have an issue, question or suggestion? Please use the form below to get in touch.</p>
-                 <div class="aspect-w-1 aspect-h-1" style="height: 856px;">
-                    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeLPW40BfHHuA6gb6OU1YtDjxE3TRc0SRuvlTGanI9_CwdVkA/viewform?embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-                 </div>
-            </div>
-
-
-            <!-- Results Section / Loading Indicator -->
-            <div id="results-container" class="mt-8">
-                <!-- Search results will be dynamically inserted here -->
-            </div>
-            <div id="pagination-container" class="mt-8 text-center">
-                <!-- "Load More" button will be inserted here -->
-            </div>
-        </main>
-    </div>
-
-    <script>
-        // DOM Elements
-        const journalInput = document.getElementById('journal-input');
-        const searchBtn = document.getElementById('search-btn');
-        const clearSearchBtn = document.getElementById('clear-search-btn');
-        const filterBtn = document.getElementById('filter-btn');
-        const resetBtn = document.getElementById('reset-btn');
-        const resultsContainer = document.getElementById('results-container');
-        const paginationContainer = document.getElementById('pagination-container');
-        const rankSelect = document.getElementById('rank-select');
-        const forNameSelect = document.getElementById('for-name-select');
-        const publisherSelect = document.getElementById('publisher-select');
-        const openAccessSelect = document.getElementById('open-access-select');
-        const sortSelect = document.getElementById('sort-select');
-        const tabContainer = document.getElementById('tab-container');
-        const tabJournalSearch = document.getElementById('tab-journal-search');
-        const tabFilterSearch = document.getElementById('tab-filter-search');
-        const tabAbout = document.getElementById('tab-about');
-        const tabFaq = document.getElementById('tab-faq');
-        const tabContact = document.getElementById('tab-contact');
-        const panelJournalSearch = document.getElementById('panel-journal-search');
-        const panelFilterSearch = document.getElementById('panel-filter-search');
-        const panelAbout = document.getElementById('panel-about');
-        const panelFaq = document.getElementById('panel-faq');
-        const panelContact = document.getElementById('panel-contact');
-
-        // App State
-        let journalData = [];
-        let fuse;
-        let tomSelectInstances = {};
-        let currentSearchResults = [];
-        let currentlyDisplayedCount = 0;
-        const RESULTS_PER_PAGE = 100;
-
-        // --- Utility Functions ---
-
-        // Define the set of acronyms for consistent uppercasing.
-        const acronyms = new Set([
-            'aaas', 'pnas', 'npg', 'plos', 'jci', 'acm', 'siam', 'ifac', 'iet', 'ios', 'aip', 'ima', 'ams', 'crm', 'lms', 'prl', 'rmp', 'jama', 'bmj', 'nejm', 'acs', 'asbmb', 'embo', 'bmc', 'ascb', 'asm', 'faseb', 'iubmb', 'jbc', 'aom', 'amj', 'amr', 'jibs', 'jom', 'ms', 'or', 'jmr', 'jacf', 'aer', 'jpe', 'qje', 'jf', 'apa', 'asa', 'ajs', 'jpsp', 'apsa', 'ahr', 'pmla', 'jaac', 'hlr', 'ylr', 'clr', 'ajps', 'apsr', 'bjps', 'jop', 'aera', 'ncate', 'rer', 'aerj', 'esa', 'agu', 'est', 'oup', 'cup', 'jhu', 'ucp', 'hup', 'nsf', 'nih', 'erc', 'ukri', 'darpa', 'esrc', 'ahrc', 'jstor', 'ssrn', 'oecd', 'who', 'wipo', 'ieee', 'aps', 'ama', 'mis', 'ieee/acm','ieee-acm','acm/ieee','acm-ieee', 'ieee-asme','ieee-caa', 'ieee/caa', 'ieee/asme', 'iim','iimb','ima','ems','vlc','iea','ibt','icissp','ibad','iee','icfai','aaai','iet','ifip','ifla','rf','(jxcdc)','lcs:','lts:','(ojim)','(ojuffc)','a','b','c','(t-fr)','(vlsi)','mgc','it','i','ii','iii','iv','v','imf'
-        ]);
-
-        function toTitleCase(str) {
-            if (!str || typeof str !== 'string') return '';
-            
-            const articles = ['a', 'an', 'the'];
-            const conjunctions = ['and', 'but', 'or', 'nor', 'for', 'so', 'yet'];
-            const prepositions = ['in', 'on', 'at', 'to', 'of', 'by', 'for', 'from', 'with', 'as'];
-            const smallWords = new Set([...articles, ...conjunctions, ...prepositions]);
-
-            return str.split(' ').map((word, index, arr) => {
-                const lowerWord = word.toLowerCase();
-
-                // Special case for 'npj' to always be lowercase
-                if (lowerWord === 'npj') {
-                    return 'npj';
-                }
-
-                // Check if the word is a known acronym
-                if (acronyms.has(lowerWord)) {
-                    return word.toUpperCase();
-                }
-                
-                // Capitalize first and last words regardless of what they are
-                if (index === 0 || index === arr.length - 1) {
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                }
-
-                // Keep small words lowercase
-                if (smallWords.has(lowerWord)) {
-                    return lowerWord;
-                }
-
-                // Default capitalization for other words
-                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-            }).join(' ');
-        }
-        
-        function showInfoModal(message) {
-            const modalOverlay = document.createElement('div');
-            modalOverlay.className = 'modal-overlay';
-            modalOverlay.innerHTML = `
-                <div class="modal-content">
-                    <span class="modal-close">&times;</span>
-                    <p>${message}</p>
-                </div>
-            `;
-            document.body.appendChild(modalOverlay);
-            modalOverlay.querySelector('.modal-close').onclick = () => modalOverlay.remove();
-            modalOverlay.onclick = (e) => {
-                if (e.target === modalOverlay) {
-                    modalOverlay.remove();
-                }
-            };
-        }
-
-        // --- Display and Pagination Functions ---
-
-        function displayResults(isLoadMore = false) {
-            if (!isLoadMore) {
-                resultsContainer.innerHTML = '';
-                currentlyDisplayedCount = 0;
-                // Add a status message with the total number of results found
-                const statusMessage = document.createElement('p');
-                statusMessage.className = 'text-gray-600 italic my-4';
-                statusMessage.textContent = `Found ${currentSearchResults.length} journal(s).`;
-                resultsContainer.appendChild(statusMessage);
-            }
-            
-            paginationContainer.innerHTML = ''; // Clear previous pagination controls
-
-            const fragment = document.createDocumentFragment();
-            const resultsToShow = currentSearchResults.slice(currentlyDisplayedCount, currentlyDisplayedCount + RESULTS_PER_PAGE);
-
-            const isFilterSearch = tabFilterSearch.classList.contains('active');
-
-            // Create a container for the results to be added
-            let listContainer = resultsContainer.querySelector('.results-list-container');
-            if (!listContainer) {
-                listContainer = document.createElement('div');
-                listContainer.className = 'results-list-container flex flex-col gap-6';
-                if (isFilterSearch) {
-                    listContainer.className = 'results-list-container space-y-2';
-                }
-                fragment.appendChild(listContainer);
-            }
-
-            resultsToShow.forEach(journal => {
-                let card;
-                if (isFilterSearch) {
-                    card = createFilterListItem(journal, listContainer);
-                } else {
-                    card = createDetailCard(journal);
-                }
-                listContainer.appendChild(card);
-            });
-
-            if (!isLoadMore) {
-                resultsContainer.appendChild(fragment);
-            } else {
-                resultsContainer.querySelector('.results-list-container').append(...listContainer.childNodes);
-            }
-
-            currentlyDisplayedCount += resultsToShow.length;
-
-            if (currentlyDisplayedCount < currentSearchResults.length) {
-                createLoadMoreButton();
-            }
-        }
-
-        function createLoadMoreButton() {
-            const button = document.createElement('button');
-            button.id = 'load-more-btn';
-            button.className = 'bg-lau-green text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition';
-            button.textContent = 'Load More';
-            
-            const progressBar = document.createElement('div');
-            progressBar.className = 'w-full bg-gray-200 rounded-full h-1.5 mt-2 hidden';
-            progressBar.innerHTML = `<div class="bg-lau-green h-1.5 rounded-full" style="width: 0%"></div>`;
-
-            button.addEventListener('click', () => {
-                button.textContent = 'Loading...';
-                button.disabled = true;
-                progressBar.classList.remove('hidden');
-                const progress = progressBar.firstChild;
-                progress.style.width = '50%'; // Simulate progress
-                
-                // Simulate network delay for a better user experience
-                setTimeout(() => {
-                    progress.style.width = '100%';
-                    setTimeout(() => {
-                        displayResults(true);
-                    }, 200);
-                }, 300);
-            });
-            
-            paginationContainer.appendChild(button);
-            paginationContainer.appendChild(progressBar);
-        }
-
-        function createDetailContent(journal) {
-            const contentWrapper = document.createElement('div');
-            const formatValue = (value) => (value === null || value === undefined || value === '') ? 'N/A' : value;
-            
-            const otherRanks = {
-                'JUFOLevel': 'JUFO Level',
-                'ABDC2022': 'ABDC 2022',
-                'FNEGE2022': 'FNEGE 2022',
-                'AJG2024': 'AJG 2024',
-                'VHB2024': 'VHB 2024'
-            };
-            const otherRanksHtml = Object.entries(otherRanks).map(([key, displayName]) => {
-                return `<p><strong>${displayName}:</strong> ${formatValue(journal[key])}</p>`;
-            }).join('');
-
-            const forCodesHtml = [1, 2, 3].map(i => {
-                const code = journal[`FoR${i}Code`];
-                const name = journal[`FoR${i}Name`];
-                return (code && name) ? `<p><strong>FoR ${i}:</strong> ${toTitleCase(name)} (${code})</p>` : '';
-            }).join('');
-
-            const eliteStatus = journal.IsElite == 1 ? 'Yes' : 'No';
-            const businessRanking = journal.SpecialCalcFlag == 1 ? 'Included' : 'Excluded';
-            const score = parseFloat(journal.Score_Uncertainty);
-            const uncertaintyScore = !isNaN(score) ? score.toFixed(1) : 'N/A';
-            
-            const infoIconSvg = `<svg class="info-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>`;
-
-            const warningListHtml = journal.OnWarningList === 'Yes'
-                ? `<p class="text-red-600 font-semibold"><strong>Warning List<span onclick="showInfoModal('This indicates if the journal is listed in the Early Warning List published by the Chinese Academy of Sciences.')">${infoIconSvg}</span>:</strong> Yes</p>`
-                : `<p><strong>Warning List<span onclick="showInfoModal('This indicates if the journal is listed in the Early Warning List published by the Chinese Academy of Sciences.')">${infoIconSvg}</span>:</strong> No</p>`;
-
-            contentWrapper.innerHTML = `
-                <div class="space-y-2 text-sm text-gray-600 pt-3">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
-                        <div>
-                            <p><strong class="lau-green">ORBIT Rank:</strong> <span class="lau-green font-semibold">${formatValue(journal.LAU_ORBIT_Rank)}</span></p>
-                            <p><strong>Elite Journal<span onclick="showInfoModal('This indicates if the journal is currently listed in the ARWU Shanghai, FT50, Nature Index, or UTD24 lists.')">${infoIconSvg}</span>:</strong> ${eliteStatus}</p>
-                            ${warningListHtml}
-                            <p><strong>Norwegian Level:</strong> ${formatValue(journal.NorwegianLevel)}</p>
-                            ${otherRanksHtml}
-                             <p><strong>Business Rankings<span onclick="showInfoModal('This indicates if the ORBIT Rank is taking into account ABDC, AJG, FNEGE, and VHB. These rankings are only used for journals primarily focused on business, economics, and finance.')">${infoIconSvg}</span>:</strong> ${businessRanking}</p>
-                             <p><strong>Uncertainty Score<span onclick="showInfoModal('This score quantifies the disagreement among the ranking systems. A low score (e.g., below 5) indicates a reliable grade based on strong consensus, while a high score reveals conflicting views.')">${infoIconSvg}</span>:</strong> ${uncertaintyScore}</p>
-                        </div>
-                        <div>
-                            <p><strong>ISSN1:</strong> ${formatValue(journal.ISSN1)}</p>
-                            <p><strong>ISSN2:</strong> ${formatValue(journal.ISSN2)}</p>
-                            <p><strong>Publisher:</strong> ${formatValue(journal.Publisher)}</p>
-                            <p><strong>Open Access:</strong> ${formatValue(journal.Is_OA)}</p>
-                            <p><strong>Homepage:</strong> ${journal.Homepage ? `<a href="${journal.Homepage}" target="_blank" class="hyperlink">Click here<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a>` : 'N/A'}</p>
-                            <div class="pt-2">
-                                <h4 class="font-bold text-gray-700">Field of Research (FoR)<span onclick="showInfoModal('Field of Research (FoR) as classified by the widely used Australian and New Zealand Standard Research Classification (ANZSRC).')">${infoIconSvg}</span></h4>
-                                ${forCodesHtml || '<p>N/A</p>'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            return contentWrapper;
-        }
-
-        function createFilterListItem(journal, listContainer) {
-            const wrapper = document.createElement('div');
-            const summaryItem = document.createElement('div');
-            summaryItem.className = 'summary-item flex justify-between items-center p-3 border rounded-md';
-            summaryItem.innerHTML = `<span class="font-medium text-gray-800">${toTitleCase(journal.JournalName || 'N/A')}</span><span class="lau-green font-semibold text-sm">${journal.LAU_ORBIT_Rank || 'N/A'}</span>`;
-            
-            const detailItem = document.createElement('div');
-            detailItem.className = 'hidden p-4 border border-t-0 rounded-b-md bg-gray-50 detail-view';
-            detailItem.appendChild(createDetailContent(journal));
-
-            summaryItem.onclick = () => {
-                const allDetails = listContainer.querySelectorAll('.detail-view');
-                allDetails.forEach(detail => {
-                    if (detail !== detailItem && !detail.classList.contains('hidden')) {
-                        detail.classList.add('hidden');
-                        detail.previousElementSibling.classList.remove('rounded-b-none');
-                    }
-                });
-                detailItem.classList.toggle('hidden');
-                summaryItem.classList.toggle('rounded-b-none', !detailItem.classList.contains('hidden'));
-            };
-            
-            wrapper.appendChild(summaryItem);
-            wrapper.appendChild(detailItem);
-            return wrapper;
-        }
-        
-        function createDetailCard(journal) {
-            const card = document.createElement('div');
-            card.className = 'result-card bg-white rounded-lg shadow-md p-5';
-            card.innerHTML = `<h3 class="text-xl font-bold text-gray-800 mb-3">${toTitleCase(journal.JournalName || 'N/A')}</h3>`;
-            card.appendChild(createDetailContent(journal));
-            return card;
-        }
-
-        // --- Search and Filter Logic ---
-        function handleSearch() {
-            const query = journalInput.value.trim().toLowerCase();
-            if (!query) {
-                currentSearchResults = [];
-                displayResults();
-                return;
-            }
-            const isIssn = /^\d{4}-?\d{3}[\dxX]$/.test(query);
-            
-            if (isIssn) {
-                currentSearchResults = journalData.filter(j => {
-                    const issn1 = String(j.ISSN1 || '').replace('-', '').toLowerCase();
-                    const issn2 = String(j.ISSN2 || '').replace('-', '').toLowerCase();
-                    const queryIssn = query.replace('-', '');
-                    return issn1 === queryIssn || issn2 === queryIssn;
-                });
-            } else {
-                currentSearchResults = fuse.search(query).map(r => r.item);
-            }
-            displayResults();
-        }
-
-        function handleFilter() {
-            const selectedRanks = tomSelectInstances.ranks.getValue();
-            const selectedForNames = tomSelectInstances.forNames.getValue();
-            const selectedPublishers = tomSelectInstances.publishers.getValue();
-            const selectedOA = openAccessSelect.value;
-            const sortBy = sortSelect.value;
-
-            let filteredData = journalData.filter(j => {
-                // Modified rankMatch logic
-                const hasRank = !!j.LAU_ORBIT_Rank;
-                const wantsNARank = selectedRanks.includes('N/A');
-                let rankMatch = selectedRanks.length === 0;
-                if (!rankMatch) {
-                    if (hasRank) {
-                        rankMatch = selectedRanks.includes(String(j.LAU_ORBIT_Rank));
-                    } else {
-                        rankMatch = wantsNARank;
-                    }
-                }
-
-                const publisherMatch = selectedPublishers.length === 0 || selectedPublishers.includes(j.Publisher);
-                const oaMatch = selectedOA === 'All' || j.Is_OA === selectedOA;
-                const forNameMatch = selectedForNames.length === 0 || selectedForNames.some(name => 
-                    toTitleCase(j['FoR1Name']) === name || 
-                    toTitleCase(j['FoR2Name']) === name || 
-                    toTitleCase(j['FoR3Name']) === name
-                );
-                return rankMatch && publisherMatch && forNameMatch && oaMatch;
-            });
-
-            const rankOrder = ['A+', 'A', 'B', 'C', 'D+', 'D', 'E', 'F'];
-            if (sortBy === 'rank-asc') {
-                filteredData.sort((a, b) => {
-                    const indexA = rankOrder.indexOf(a.LAU_ORBIT_Rank);
-                    const indexB = rankOrder.indexOf(b.LAU_ORBIT_Rank);
-                    if (indexA === -1) return 1;
-                    if (indexB === -1) return -1;
-                    return indexA - indexB;
-                });
-            } else if (sortBy === 'rank-desc') {
-                 filteredData.sort((a, b) => {
-                    const indexA = rankOrder.indexOf(a.LAU_ORBIT_Rank);
-                    const indexB = rankOrder.indexOf(b.LAU_ORBIT_Rank);
-                    if (indexA === -1) return 1;
-                    if (indexB === -1) return -1;
-                    return indexB - indexA;
-                });
-            } else { // Default to name-asc
-                filteredData.sort((a, b) => (a.JournalName || '').localeCompare(b.JournalName || ''));
-            }
-            currentSearchResults = filteredData;
-            displayResults();
-        }
-
-        function handleResetFilters() {
-            Object.values(tomSelectInstances).forEach(instance => instance.clear());
-            sortSelect.value = 'name-asc';
-            openAccessSelect.value = 'All';
-            resultsContainer.innerHTML = '';
-            paginationContainer.innerHTML = '';
-            currentSearchResults = [];
-        }
-
-        // --- Initialization and UI Setup ---
-        function populateDropdowns() {
-            const tomSelectSettings = {
-                plugins: ['remove_button'],
-                maxOptions: null, // Show all options
-            };
-            // Ranks
-            const rankOrder = ['A+', 'A', 'B', 'C', 'D+', 'D', 'E', 'F'];
-            const ranks = [...new Set(journalData.map(j => j.LAU_ORBIT_Rank).filter(Boolean))].sort((a, b) => {
-                const indexA = rankOrder.indexOf(a), indexB = rankOrder.indexOf(b);
-                return (indexA !== -1 && indexB !== -1) ? indexA - indexB : a.localeCompare(b);
-            });
-            const rankOptions = ranks.map(r => ({ value: r, text: r }));
-            rankOptions.push({ value: 'N/A', text: 'N/A' }); // Add N/A option
-            tomSelectInstances.ranks = new TomSelect(rankSelect, { ...tomSelectSettings, placeholder: 'Select ranks...', options: rankOptions });
-
-            // FoR Names
-            const forNames = new Set();
-            journalData.forEach(j => {
-                for (let i = 1; i <= 3; i++) {
-                    const name = j[`FoR${i}Name`];
-                    if (name && name.trim()) forNames.add(toTitleCase(name.trim()));
-                }
-            });
-            const sortedForNames = [...forNames].sort((a, b) => a.localeCompare(b));
-            tomSelectInstances.forNames = new TomSelect(forNameSelect, { ...tomSelectSettings, placeholder: 'Select FoR names...', options: sortedForNames.map(name => ({ value: name, text: name })) });
-
-            // Publishers
-            const publishers = [...new Set(journalData.map(j => j.Publisher).filter(p => p && p.trim()).map(p => p.trim()))].sort();
-            tomSelectInstances.publishers = new TomSelect(publisherSelect, { ...tomSelectSettings, placeholder: 'Select publishers...', options: publishers.map(p => ({ value: p, text: p })) });
-        }
-
-        function switchTab(activeTab) {
-            const tabs = {
-                journal: { button: tabJournalSearch, panel: panelJournalSearch },
-                filter: { button: tabFilterSearch, panel: panelFilterSearch },
-                about: { button: tabAbout, panel: panelAbout },
-                faq: { button: tabFaq, panel: panelFaq },
-                contact: { button: tabContact, panel: panelContact }
-            };
-            Object.values(tabs).forEach(({ button, panel }) => {
-                button.classList.remove('active');
-                panel.classList.add('hidden');
-            });
-            tabs[activeTab].button.classList.add('active');
-            tabs[activeTab].panel.classList.remove('hidden');
-            resultsContainer.innerHTML = '';
-            paginationContainer.innerHTML = '';
-            currentSearchResults = [];
-            // Re-render MathJax if the FAQ tab is selected
-            if (activeTab === 'faq' && window.MathJax) {
-                MathJax.typesetPromise();
-            }
-        }
-        
-       const faqData = [
-            // RE-ORDERED FAQ ITEMS
-            // ORBIT Methodology
-            {
-                group: 'faq-group-1',
-                question: '❓ What is the main goal of the ORBIT system?',
-                answer: `The primary goal of ORBIT is to provide a more stable and holistic measure of a journal's standing by synthesizing the expert opinions from multiple, established international ranking systems. This approach helps to resolve disagreements between individual lists and reduces the biases inherent in any single ranking.`
-            },
-            {
-                group: 'faq-group-1',
-                question: '❓ Why are citation-based metrics like JIF, SJR, or CiteScore not used?',
-                answer: `ORBIT is intentionally designed to be an alternative to citation-based metrics. Citation metrics often reward popularity over rigor, and can be inflated by self-citations, editorial strategies, or even paper mills—making them unreliable indicators of true scholarly quality. Our framework prioritizes expert-driven, tier-based evaluations which are designed to reflect perceived academic quality and reputation.`
-            },
-            {
-                group: 'faq-group-1',
-                question: '❓ Can you provide more context on why citation-based metrics are considered problematic?',
-                answer: `Citation-based metrics—such as the h-index, CiteScore, and SNIP—are widely used but suffer from both practical and conceptual flaws. A striking example comes from the 2025 Google Scholar venue rankings, which place <i>IEEE Access</i> and MDPI’s <i>Sustainability</i> among the top 30 journals worldwide—ranking them above <i>Nature Medicine</i>, <i>JACS</i>, and <i>BMJ</i>. This is despite the fact that these journals have been flagged by the Chinese Academy of Sciences and assigned the lowest rating by both JUFO and the Norwegian Register. In mathematics and physics, the situation is reversed: prestigious journals like the <i>Annals of Mathematics</i> are entirely unranked, while questionable titles like <i>Chaos, Solitons & Fractals</i> are prominently listed. This reflects a systemic bias toward citation volume rather than scholarly quality.<br><br>From a theoretical standpoint, these metrics also fail under the lens of statistical decision theory. If journal evaluation is treated as a hypothesis test—where the null hypothesis is that a journal is "not of high quality"—then a reliable metric should minimize both Type I errors (false positives) and Type II errors (false negatives). Citation-based systems are prone to both. For instance, CiteScore places over 130 MDPI journals in the top quartile, including <i>Cells</i>, which appears on the Early Warning List issued by the Chinese Academy of Sciences. Yet expert-based systems like ORBIT assign none of these journals top grades, with most receiving a ‘D’. At the same time, citation metrics tend to penalize respected but slower-citing journals like <i>MIT Sloan Management Review</i>, which ranks poorly despite being on the FT50 list. These inconsistencies highlight how citation-based rankings can mislead real-world decisions in tenure, funding, and evaluation.`
-            },
-            {
-                group: 'faq-group-1',
-                question: '❓ Why are major indexing databases such as Scopus or Web of Science not included as a ranking system?',
-                answer: `Indexing databases serve a different, albeit critical, function: they verify a journal's existence and discoverability, not its quality. Inclusion standards can vary, and presence in an index does not equate to academic reputation. ORBIT focuses on systems that actively assess and rank journals based on quality, not just on their inclusion in a database.`
-            },
-            {
-                group: 'faq-group-1',
-                question: `❓ Why aren’t other national ranking systems like the Danish list or HCERES (France) included?`,
-                answer: `Our methodology requires that we only include ranking systems that are actively and regularly updated, are primarily expert-driven (not purely metric-based), and are integrative in nature. Many national systems are either no longer maintained, rely heavily on citation indicators. If you know of a system that fits our criteria, please let us know.`
-            },
-            {
-                group: 'faq-group-1',
-                question: '❓ Why does ORBIT convert continuous scores into letter grades, and what are the trade-offs?',
-                answer: `Although ORBIT generates a continuous score for each journal, it is quantized into five letter grades (A+, A, B, C, D) to support clearer decision-making in academic evaluation and policy. This five-grade system strikes a balance between simplicity and informativeness. The main benefit is that it offers an easily interpretable summary of a journal's standing. However, this quantization also leads to a loss of detail—two journals with different ORBIT scores might fall into the same grade category. To mitigate this, ORBIT provides a continuous uncertainty score that should be used alongside the letter grade, especially for journals near grade boundaries or with high uncertainty. The fewer the grade levels, the more important it is to consider this uncertainty for a more accurate assessment.`
-            },
-            {
-                group: 'faq-group-1',
-                question: `❓ What are the “Elite” and “Warning” lists used for overrides?`,
-                answer: `To ground our percentile-based grading in a real-world benchmark, we use a "ground truth" for the absolute top and bottom tiers. The "Elite" status is based on a journal's inclusion in highly-regarded international lists like the Nature Index, FT50, and UTD24. The "Warning" status is based on inclusion in lists of predatory or questionable publications, such as the CAS Warning List. These are used to apply a final override, ensuring that journals with a universal reputation for excellence or poor quality are graded accordingly.`
-            },
-            {
-                group: 'faq-group-1',
-                question: `❓How reliable is the “ground truth” dataset used to validate the ranking systems? Could different elite lists change the results?`,
-                answer: `The "ground truth" dataset is based on globally recognized sources, but it has its own inherent subjectivity. The concept of a definitive "elite" list is open to academic debate, and using different ground truth sources could lead to different reliability scores for the ranking systems.`
-            },
-            {
-                group: 'faq-group-1',
-                question: '❓ How does ORBIT perform compared to existing journal ranking systems?',
-                answer: `ORBIT consistently outperforms individual ranking systems in both stability and accuracy. By aggregating multiple expert-based lists through a reliability-weighted, pessimistic approach, it generates a consensus score that reflects the central point of agreement across systems. Our internal coherence analysis shows that ORBIT’s average error against a simple consensus is nearly ten times lower than that of the next-best system—demonstrating that it is not just a compromise, but a statistically superior representation. Its final score distribution is also less volatile and more centrally peaked, offering a more reliable and defensible measure of a journal’s overall standing.`
-            },
-            {
-                group: 'faq-group-1',
-                question: `❓ How often is the ORBIT system updated?`,
-                answer: `The ORBIT rankings are updated whenever one of the six source ranking systems releases a new version. Once a new list is published, the integration and recalculation process typically takes one to two weeks to complete.`
-            },
-            // Using the ORBIT Rankings
-            {
-                group: 'faq-group-2',
-                question: `❓ How is the ORBIT score for a non-business journal calculated, and is it as reliable as the score for a business journal?`,
-                answer: `For journals outside of business and management, the ORBIT score is based primarily on the JUFO and Norwegian systems. Because these are the only comprehensive, multi-disciplinary lists used, the consensus for non-business fields is less diversified than for business journals, which can be evaluated by up to six systems.`
-            },
-            {
-                group: 'faq-group-2',
-                question: `❓ Why doesn't a specific journal have an ORBIT rank?`,
-                answer: `ORBIT only assigns a rank and score to journals that are evaluated by at least two of the six international ranking systems we use. This policy ensures that every ORBIT score is a true consensus and not based on a single opinion. While this may exclude some specialized journals, it significantly increases the reliability of the ranks we do provide.`
-            },
-            {
-                group: 'faq-group-2',
-                question: `❓How should I interpret the "Uncertainty Score"?`,
-                answer: `The Uncertainty Score measures how much the different ranking systems disagree about a journal's quality. A low score (e.g., below 5) is excellent. It indicates a strong consensus, meaning the ORBIT grade is very reliable. A high score (e.g., above 20) is a warning flag. It means the ranking systems have conflicting opinions, so while the ORBIT grade represents the mathematical average, it should be interpreted with caution.`
-            },
-            {
-                group: 'faq-group-2',
-                question: `❓ My journal has a good ORBIT grade (e.g., 'A') but a high uncertainty score. How should I interpret this?`,
-                answer: `This is a key feature of the ORBIT system. It means that while the average of the expert opinions places your journal in a high tier, there is significant disagreement among the different ranking systems. For example, one system might rank it as A+ while another ranks it as B or C. The 'A' grade tells you its overall position, but the high uncertainty score is a crucial piece of context, signaling that the journal's prestige is not universally agreed upon across all academic communities or regions.`
-            },
-            {
-                group: 'faq-group-2',
-                question: `❓ Does ORBIT include conference proceedings?`,
-                answer: `Currently, the ORBIT system focuses exclusively on journals. We recognize the importance of conference proceedings in many fields, especially in computer science and engineering, and are planning to include conference rankings in a future iteration of the system.`
-            },
-             {
-                group: 'faq-group-2',
-                question: `❓Does the ORBIT system unintentionally penalize journals from non-English speaking regions or those with a strong regional focus?`,
-                answer: `The ORBIT model is designed to mitigate this risk by including multiple international systems with different geographical focuses (e.g., VHB for the German-speaking world, FNEGE for France, ABDC for the Asia-Pacific region). By aggregating these diverse perspectives, ORBIT is less likely to be biased by the perspective of any single region compared to relying on a single, globally-dominant list. However, because the included lists are themselves predominantly European and Australian, some regional biases may still persist.`
-            },
-            {
-                group: 'faq-group-2',
-                question: `❓How should a university or a promotion committee use the ORBIT rankings in practice?`,
-                answer: `ORBIT is designed to be a tool that supports, rather than replaces, expert judgment, in line with the DORA and Leiden Manifesto principles. A committee could use the ORBIT Grade as a primary indicator of a journal's overall standing. Crucially, they should also consider the Uncertainty Score. A high uncertainty score should prompt a deeper, qualitative review of the publication, as it indicates that the journal's quality is disputed. Using both metrics together provides a much more nuanced and defensible basis for evaluation than using a simple letter grade alone.`
-            }
-        ];
-
-        function populateFaqs() {
-            faqData.forEach(item => {
-                const groupContainer = document.getElementById(item.group);
-                if (!groupContainer) return;
-
-                const faqItem = document.createElement('div');
-                faqItem.className = 'faq-item border rounded-md';
-
-                faqItem.innerHTML = `
-                    <div class="faq-question cursor-pointer flex justify-between items-center p-4">
-                        <span class="font-medium text-gray-800">${item.question}</span>
-                        <svg class="faq-arrow w-5 h-5 text-gray-500 transition-transform transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                    </div>
-                    <div class="faq-answer hidden p-4 border-t border-gray-200 bg-gray-50 text-gray-700 prose max-w-none">
-                        <p>${item.answer}</p>
-                    </div>
-                `;
-                groupContainer.appendChild(faqItem);
-            });
-        }
-
-        // Event Listeners
-        searchBtn.addEventListener('click', handleSearch);
-        journalInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleSearch(); });
-        clearSearchBtn.addEventListener('click', () => {
-            journalInput.value = '';
-            resultsContainer.innerHTML = '';
-            paginationContainer.innerHTML = '';
-            currentSearchResults = [];
-        });
-        filterBtn.addEventListener('click', handleFilter);
-        resetBtn.addEventListener('click', handleResetFilters);
-        tabJournalSearch.addEventListener('click', () => switchTab('journal'));
-        tabFilterSearch.addEventListener('click', () => switchTab('filter'));
-        tabAbout.addEventListener('click', () => switchTab('about'));
-        tabFaq.addEventListener('click', () => switchTab('faq'));
-        tabContact.addEventListener('click', () => switchTab('contact'));
-        
-        panelFaq.addEventListener('click', e => {
-            const questionHeader = e.target.closest('.faq-question');
-            if (!questionHeader) return;
-
-            const faqItem = questionHeader.parentElement;
-            const answer = faqItem.querySelector('.faq-answer');
-
-            // Close all other items
-            const allItems = panelFaq.querySelectorAll('.faq-item');
-            allItems.forEach(item => {
-                if (item !== faqItem) {
-                    item.querySelector('.faq-answer').classList.add('hidden');
-                    item.querySelector('.faq-question').classList.remove('active');
-                }
-            });
-
-            // Toggle the clicked item
-            answer.classList.toggle('hidden');
-            questionHeader.classList.toggle('active');
-        });
-
-        // Data Loading
-        window.addEventListener('DOMContentLoaded', async () => {
-            populateFaqs(); // Populate the FAQ section
-            resultsContainer.innerHTML = `<div id="loading-container" class="w-full max-w-md mx-auto"><p class="text-center text-gray-600 mb-2">Loading data...</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div id="progress-bar" class="bg-lau-green h-2.5 rounded-full" style="width: 0%"></div></div></div>`;
-            const progressBar = document.getElementById('progress-bar');
-            try {
-                const response = await fetch('https://raw.githubusercontent.com/lauorbit/lauorbit/main/ORBIT.xlsx');
-                if (!response.ok) throw new Error('Network response was not ok.');
-                const contentLength = +response.headers.get('Content-Length');
-                let receivedLength = 0;
-                const chunks = [];
-                const reader = response.body.getReader();
-                while(true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    chunks.push(value);
-                    receivedLength += value.length;
-                    if (contentLength) progressBar.style.width = `${(receivedLength / contentLength) * 100}%`;
-                }
-                const chunksAll = new Uint8Array(receivedLength);
-                let position = 0;
-                for(let chunk of chunks) {
-                    chunksAll.set(chunk, position);
-                    position += chunk.length;
-                }
-                const workbook = XLSX.read(chunksAll.buffer, {type: 'buffer'});
-                journalData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
-                
-                // Initialize Fuse.js
-                const options = {
-                    includeScore: true,
-                    keys: ['JournalName'],
-                    threshold: 0.4,
-                    ignoreLocation: true,
-                    findAllMatches: true,
-                };
-                fuse = new Fuse(journalData, options);
-
-                document.getElementById('loading-container').remove();
-                tabContainer.classList.remove('hidden');
-                panelJournalSearch.classList.remove('hidden');
-                populateDropdowns();
-                resultsContainer.innerHTML = '';
-            } catch (error) {
-                console.error('Error loading journal data:', error);
-                resultsContainer.innerHTML = `<p class="text-center text-red-500">Failed to load journal data. Please check the URL and your internet connection.</p>`;
-            }
-        });
-    </script>
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            
+            <!-- START: Inserted ORBIT Animation -->
+            <div class="icon-container">
+                <svg width="100%" height="100%" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Glow filter effect -->
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                        <!-- Gradient for the central text -->
+                        <linearGradient id="orbitTextGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#005cff;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+    
+                    <!-- Central Text "ORBIT" -->
+                    <text x="200" y="200" dominant-baseline="central" text-anchor="middle" font-family="'Orbitron', sans-serif" font-size="48" font-weight="bold" fill="url(#orbitTextGradient)" filter="url(#glow)" letter-spacing="2">
+                        ORBIT
+                    </text>
+    
+                    <!-- Orbits and Satellites -->
+                    <!-- Each satellite is a group containing the path, the satellite circle, and its label -->
+    
+                    <!-- 1. JUFO (Closest) -->
+                    <g>
+                        <ellipse cx="200" cy="200" rx="80" ry="40" fill="none" stroke="#4A5568" stroke-width="0.5"/>
+                        <circle r="5" fill="#E53E3E">
+                            <animateMotion dur="10s" repeatCount="indefinite" path="M280,200 A80,40 0 1,0 120,200 A80,40 0 1,0 280,200" />
+                        </circle>
+                        <text x="280" y="190" class="satellite-label">JUFO</text>
+                    </g>
+    
+                    <!-- 2. Norwegian Register -->
+                    <g>
+                        <ellipse cx="200" cy="200" rx="100" ry="60" fill="none" stroke="#4A5568" stroke-width="0.5"/>
+                        <circle r="5" fill="#38A169">
+                            <animateMotion dur="12s" repeatCount="indefinite" path="M300,200 A100,60 0 1,0 100,200 A100,60 0 1,0 300,200" />
+                        </circle>
+                          <text x="100" y="215" class="satellite-label">Norwegian</text>
+                    </g>
+    
+                    <!-- 3. ABDC -->
+                    <g>
+                        <ellipse cx="200" cy="200" rx="125" ry="80" fill="none" stroke="#4A5568" stroke-width="0.5"/>
+                        <circle r="5" fill="#3182CE">
+                            <animateMotion dur="15s" repeatCount="indefinite" path="M325,200 A125,80 0 1,0 75,200 A125,80 0 1,0 325,200" />
+                        </circle>
+                        <text x="75" y="190" class="satellite-label">ABDC</text>
+                    </g>
+    
+                    <!-- 4. AJG -->
+                    <g>
+                        <ellipse cx="200" cy="200" rx="145" ry="100" fill="none" stroke="#4A5568" stroke-width="0.5"/>
+                        <circle r="5" fill="#DD6B20">
+                            <animateMotion dur="18s" repeatCount="indefinite" path="M345,200 A145,100 0 1,0 55,200 A145,100 0 1,0 345,200" />
+                        </circle>
+                          <text x="345" y="215" class="satellite-label">AJG</text>
+                    </g>
+    
+                    <!-- 5. VHB -->
+                    <g>
+                        <ellipse cx="200" cy="200" rx="170" ry="120" fill="none" stroke="#4A5568" stroke-width="0.5"/>
+                        <circle r="5" fill="#805AD5">
+                            <animateMotion dur="22s" repeatCount="indefinite" path="M370,200 A170,120 0 1,0 30,200 A170,120 0 1,0 370,200" />
+                        </circle>
+                        <text x="30" y="215" class="satellite-label">VHB</text>
+                    </g>
+    
+                    <!-- 6. FNEGE (Furthest) -->
+                    <g>
+                        <ellipse cx="200" cy="200" rx="190" ry="140" fill="none" stroke="#4A5568" stroke-width="0.5"/>
+                        <circle r="5" fill="#D53F8C">
+                            <animateMotion dur="25s" repeatCount="indefinite" path="M390,200 A190,140 0 1,0 10,200 A190,140 0 1,0 390,200" />
+                        </circle>
+                        <text x="200" y="350" class="satellite-label">FNEGE</text>
+                    </g>
+                </svg>
+            </div>
+            <!-- END: Inserted ORBIT Animation -->
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">ORBIT Rankings and Beyond</h1>
+            <p class="text-gray-600 mt-2">Your guide to journal rankings and classifications.</p>
+        </header>
+        <!-- Main Content -->
+        <main id="main-content" class="bg-white p-6 rounded-lg shadow-lg">
+            <!-- Tab Navigation -->
+            <div id="tab-container" class="mb-6 border-b border-gray-200 hidden">
+                <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
+                    <button id="tab-journal-search" class="tab-button active text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
+                        Search for a Journal
+                    </button>
+                    <button id="tab-filter-search" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
+                        Search by Field/Rank/Publisher
+                    </button>
+                    <button id="tab-about" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
+                        About
+                    </button>
+                    <button id="tab-faq" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
+                        FAQ
+                    </button>
+                    <button id="tab-contact" class="tab-button text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
+                        Contact Us
+                    </button>
+                </nav>
+            </div>
+            <!-- Search by Journal Section -->
+            <div id="panel-journal-search" class="hidden">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="relative w-full search-input-wrapper">
+                        <input type="text" id="journal-input" class="search-input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lau-green" placeholder="Enter journal name or ISSN">
+                        <span id="clear-search-btn" class="clear-search">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </span>
+                    </div>
+                    <button id="search-btn" class="bg-lau-green text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition">Search</button>
+                </div>
+            </div>
+            <!-- Search by Field/Rank Section -->
+            <div id="panel-filter-search" class="hidden">
+                 <p class="text-gray-600 mb-4">Select one or more criteria to filter journals.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
+                    <div class="flex flex-col">
+                        <label for="rank-select" class="filter-label mb-1">Rank(s)</label>
+                        <select id="rank-select" multiple></select>
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="for-name-select" class="filter-label mb-1">FoR Name(s)</label>
+                        <select id="for-name-select" multiple></select>
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="publisher-select" class="filter-label mb-1">Publisher(s)</label>
+                        <select id="publisher-select" multiple></select>
+                    </div>
+                     <div class="flex flex-col">
+                        <label for="open-access-select" class="filter-label mb-1">Open Access</label>
+                        <select id="open-access-select" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lau-green h-10 bg-white custom-select-arrow">
+                            <option value="All">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="sort-select" class="filter-label mb-1">Sort by</label>
+                        <select id="sort-select" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lau-green h-10 bg-white custom-select-arrow">
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="rank-asc">Rank (Ascending)</option>
+                            <option value="rank-desc">Rank (Descending)</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="filter-btn" class="w-full bg-lau-green text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition h-10">Filter</button>
+                        <button id="reset-btn" class="w-full bg-gray-200 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-300 transition h-10">Reset</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- About Section -->
+            <div id="panel-about" class="hidden prose max-w-none">
+                <h2 class="lau-green">About the ORBIT Ranking</h2>
+                <p>This tool provides access to the Objective Ranking through Bias-reduced Integrated Tiers (ORBIT), a comprehensive system designed to offer a stable and holistic view of academic journal quality.</p>
+                <p>ORBIT synthesizes the expert opinions of six major international ranking systems to produce a single consensus grade and an "uncertainy score" that measures the level of agreement among the sources.</p>
+                <p>To find a journal, you can search by its name, ISSN, or browse by field of research using the standardized <a href="https://www.arc.gov.au/manage-your-grant/classification-codes-rfcd-seo-and-anzsic-codes" target="_blank" class="hyperlink">Australian and New Zealand Standard Research Classification (ANZSRC) codes<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a>. Our goal is to provide a robust, transparent, and easy-to-use guide for scholars, researchers, and academic institutions.</p>
+                
+                <h3 class="lau-green mt-6">Grade Distribution and Meaning</h3>
+                 <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2 border">Grade</th>
+                            <th class="p-2 border">Count</th>
+                            <th class="p-2 border">Percentage</th>
+                            <th class="p-2 border">Meaning</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="p-2 border align-top">A+</td>
+                            <td class="p-2 border align-top">1098</td>
+                            <td class="p-2 border align-top">4.67%</td>
+                            <td class="p-2 border">Represents journals of the highest tier, either by achieving a top percentile score or by being on the consolidated Elite List. Indicates universal recognition as a leading journal.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border align-top">A</td>
+                            <td class="p-2 border align-top">2684</td>
+                            <td class="p-2 border align-top">11.43%</td>
+                            <td class="p-2 border">Denotes journals of excellent quality that fall just below the elite tier. These are highly-regarded publications with a strong consensus.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border align-top">B</td>
+                            <td class="p-2 border align-top">14242</td>
+                            <td class="p-2 border align-top">60.64%</td>
+                            <td class="p-2 border">Represents the broad, central tier of reputable and recognized academic journals. The majority of journals fall into this category.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border align-top">C</td>
+                            <td class="p-2 border align-top">2514</td>
+                            <td class="p-2 border align-top">10.70%</td>
+                            <td class="p-2 border">Indicates journals that are recognized but fall below the median quality level of the overall academic landscape.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border align-top">D</td>
+                            <td class="p-2 border align-top">2950</td>
+                            <td class="p-2 border align-top">12.56%</td>
+                            <td class="p-2 border">Represents journals of the lowest tier, either by falling in the bottom percentile or by being on the CAS Warning List. This grade suggests significant quality or integrity concerns.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <img src="https://raw.githubusercontent.com/lauorbit/lauorbit.github.io/refs/heads/main/PDF.png" alt="Probability Density Functions of Ranking System Scores" class="mx-auto my-6 w-full max-w-2xl">
+                <h3 class="lau-green mt-6">Source Rankings</h3>
+                <p>ORBIT only includes journals which are ranked by at least two of our used rankings/lists. We currently use the following expert-based rankings/lists:</p>
+                <ul class="list-disc pl-5">
+                    <li><a href="https://abdc.edu.au/abdc-journal-quality-list/" target="_blank" class="hyperlink">ABDC<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                    <li><a href="https://charteredabs.org/academic-journal-guide" target="_blank" class="hyperlink">AJG<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                    <li><a href="https://www.shanghairanking.com/activities/aes" target="_blank" class="hyperlink">ARWU<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                    <li><a href="https://ewl.fenqubiao.com/#/en/early-warning-journal-list-2024" target="_blank" class="hyperlink">Early Warning Journal List<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                    <li><a href="https://fnege.org/en/fnege-journal-quality-list/" target="_blank" class="hyperlink">FNEGE<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                    <li><a href="https://www.ft.com/content/3405a512-5cbb-11e1-8f1f-00144feabdc0" target="_blank" class="hyperlink">FT50<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                    <li><a href="https://jfp.csc.fi/jufoportal" target="_blank" class="hyperlink">JUFO<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                    <li><a href="https://www.nature.com/nature-index/faq#journal-selection" target="_blank" class="hyperlink">Nature Index<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                    <li><a href="https://kanalregister.hkdir.no/en" target="_blank" class="hyperlink">Norwegian Register<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                    <li><a href="https://jsom.utdallas.edu/the-utd-top-100-business-school-research-rankings/search#rankingsByJournal" target="_blank" class="hyperlink">UTD24<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                    <li><a href="https://www.vhbonline.org/en/services/vhb-rating-2024" target="_blank" class="hyperlink">VHB<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a></li>
+                </ul>
+                <p>We also use <a href="https://openalex.org" target="_blank" class="hyperlink">OpenAlex<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a> to obtain non-ranking data (publisher, open access status, etc.).</p>
+            </div>
+            
+            <!-- FAQ Section -->
+            <div id="panel-faq" class="hidden space-y-4">
+                <div>
+                    <h2 class="text-xl font-bold lau-green">ORBIT Methodology</h2>
+                    <div class="space-y-2 mt-2" id="faq-group-1">
+                        <!-- FAQ items will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold lau-green mt-6">Using the ORBIT Rankings</h2>
+                    <div class="space-y-2 mt-2" id="faq-group-2">
+                        <!-- FAQ items will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+            <!-- Contact Us Section -->
+            <div id="panel-contact" class="hidden">
+                 <p class="text-gray-600 mb-6">Have an issue, question or suggestion? Please use the form below to get in touch.</p>
+                 <div class="aspect-w-1 aspect-h-1" style="height: 856px;">
+                    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeLPW40BfHHuA6gb6OU1YtDjxE3TRc0SRuvlTGanI9_CwdVkA/viewform?embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                </div>
+            </div>
+            <!-- Results Section / Loading Indicator -->
+            <div id="results-container" class="mt-8">
+                <!-- Search results will be dynamically inserted here -->
+            </div>
+            <div id="pagination-container" class="mt-8 text-center">
+                <!-- "Load More" button will be inserted here -->
+            </div>
+        </main>
+    </div>
+    <script>
+        // DOM Elements
+        const journalInput = document.getElementById('journal-input');
+        const searchBtn = document.getElementById('search-btn');
+        const clearSearchBtn = document.getElementById('clear-search-btn');
+        const filterBtn = document.getElementById('filter-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const paginationContainer = document.getElementById('pagination-container');
+        const rankSelect = document.getElementById('rank-select');
+        const forNameSelect = document.getElementById('for-name-select');
+        const publisherSelect = document.getElementById('publisher-select');
+        const openAccessSelect = document.getElementById('open-access-select');
+        const sortSelect = document.getElementById('sort-select');
+        const tabContainer = document.getElementById('tab-container');
+        const tabJournalSearch = document.getElementById('tab-journal-search');
+        const tabFilterSearch = document.getElementById('tab-filter-search');
+        const tabAbout = document.getElementById('tab-about');
+        const tabFaq = document.getElementById('tab-faq');
+        const tabContact = document.getElementById('tab-contact');
+        const panelJournalSearch = document.getElementById('panel-journal-search');
+        const panelFilterSearch = document.getElementById('panel-filter-search');
+        const panelAbout = document.getElementById('panel-about');
+        const panelFaq = document.getElementById('panel-faq');
+        const panelContact = document.getElementById('panel-contact');
+        // App State
+        let journalData = [];
+        let fuse;
+        let tomSelectInstances = {};
+        let currentSearchResults = [];
+        let currentlyDisplayedCount = 0;
+        const RESULTS_PER_PAGE = 100;
+        // --- Utility Functions ---
+        // Define the set of acronyms for consistent uppercasing.
+        const acronyms = new Set([
+            'aaas', 'pnas', 'npg', 'plos', 'jci', 'acm', 'siam', 'ifac', 'iet', 'ios', 'aip', 'ima', 'ams', 'crm', 'lms', 'prl', 'rmp', 'jama', 'bmj', 'nejm', 'acs', 'asbmb', 'embo', 'bmc', 'ascb', 'asm', 'faseb', 'iubmb', 'jbc', 'aom', 'amj', 'amr', 'jibs', 'jom', 'ms', 'or', 'jmr', 'jacf', 'aer', 'jpe', 'qje', 'jf', 'apa', 'asa', 'ajs', 'jpsp', 'apsa', 'ahr', 'pmla', 'jaac', 'hlr', 'ylr', 'clr', 'ajps', 'apsr', 'bjps', 'jop', 'aera', 'ncate', 'rer', 'aerj', 'esa', 'agu', 'est', 'oup', 'cup', 'jhu', 'ucp', 'hup', 'nsf', 'nih', 'erc', 'ukri', 'darpa', 'esrc', 'ahrc', 'jstor', 'ssrn', 'oecd', 'who', 'wipo', 'ieee', 'aps', 'ama', 'mis', 'ieee/acm','ieee-acm','acm/ieee','acm-ieee', 'ieee-asme','ieee-caa', 'ieee/caa', 'ieee/asme', 'iim','iimb','ima','ems','vlc','iea','ibt','icissp','ibad','iee','icfai','aaai','iet','ifip','ifla','rf','(jxcdc)','lcs:','lts:','(ojim)','(ojuffc)','a','b','c','(t-fr)','(vlsi)','mgc','it','i','ii','iii','iv','v','imf'
+        ]);
+        function toTitleCase(str) {
+            if (!str || typeof str !== 'string') return '';
+            
+            const articles = ['a', 'an', 'the'];
+            const conjunctions = ['and', 'but', 'or', 'nor', 'for', 'so', 'yet'];
+            const prepositions = ['in', 'on', 'at', 'to', 'of', 'by', 'for', 'from', 'with', 'as'];
+            const smallWords = new Set([...articles, ...conjunctions, ...prepositions]);
+            return str.split(' ').map((word, index, arr) => {
+                const lowerWord = word.toLowerCase();
+                // Special case for 'npj' to always be lowercase
+                if (lowerWord === 'npj') {
+                    return 'npj';
+                }
+                // Check if the word is a known acronym
+                if (acronyms.has(lowerWord)) {
+                    return word.toUpperCase();
+                }
+                
+                // Capitalize first and last words regardless of what they are
+                if (index === 0 || index === arr.length - 1) {
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }
+                // Keep small words lowercase
+                if (smallWords.has(lowerWord)) {
+                    return lowerWord;
+                }
+                // Default capitalization for other words
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            }).join(' ');
+        }
+        
+        function showInfoModal(message) {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'modal-overlay';
+            modalOverlay.innerHTML = `
+                <div class="modal-content">
+                    <span class="modal-close">&times;</span>
+                    <p>${message}</p>
+                </div>
+            `;
+            document.body.appendChild(modalOverlay);
+            modalOverlay.querySelector('.modal-close').onclick = () => modalOverlay.remove();
+            modalOverlay.onclick = (e) => {
+                if (e.target === modalOverlay) {
+                    modalOverlay.remove();
+                }
+            };
+        }
+        // --- Display and Pagination Functions ---
+        function displayResults(isLoadMore = false) {
+            if (!isLoadMore) {
+                resultsContainer.innerHTML = '';
+                currentlyDisplayedCount = 0;
+                // Add a status message with the total number of results found
+                const statusMessage = document.createElement('p');
+                statusMessage.className = 'text-gray-600 italic my-4';
+                statusMessage.textContent = `Found ${currentSearchResults.length} journal(s).`;
+                resultsContainer.appendChild(statusMessage);
+            }
+            
+            paginationContainer.innerHTML = ''; // Clear previous pagination controls
+            const fragment = document.createDocumentFragment();
+            const resultsToShow = currentSearchResults.slice(currentlyDisplayedCount, currentlyDisplayedCount + RESULTS_PER_PAGE);
+            const isFilterSearch = tabFilterSearch.classList.contains('active');
+            // Create a container for the results to be added
+            let listContainer = resultsContainer.querySelector('.results-list-container');
+            if (!listContainer) {
+                listContainer = document.createElement('div');
+                listContainer.className = 'results-list-container flex flex-col gap-6';
+                if (isFilterSearch) {
+                    listContainer.className = 'results-list-container space-y-2';
+                }
+                fragment.appendChild(listContainer);
+            }
+            resultsToShow.forEach(journal => {
+                let card;
+                if (isFilterSearch) {
+                    card = createFilterListItem(journal, listContainer);
+                } else {
+                    card = createDetailCard(journal);
+                }
+                listContainer.appendChild(card);
+            });
+            if (!isLoadMore) {
+                resultsContainer.appendChild(fragment);
+            } else {
+                resultsContainer.querySelector('.results-list-container').append(...listContainer.childNodes);
+            }
+            currentlyDisplayedCount += resultsToShow.length;
+            if (currentlyDisplayedCount < currentSearchResults.length) {
+                createLoadMoreButton();
+            }
+        }
+        function createLoadMoreButton() {
+            const button = document.createElement('button');
+            button.id = 'load-more-btn';
+            button.className = 'bg-lau-green text-white px-6 py-2 rounded-md hover:bg-opacity-90 transition';
+            button.textContent = 'Load More';
+            
+            const progressBar = document.createElement('div');
+            progressBar.className = 'w-full bg-gray-200 rounded-full h-1.5 mt-2 hidden';
+            progressBar.innerHTML = `<div class="bg-lau-green h-1.5 rounded-full" style="width: 0%"></div>`;
+            button.addEventListener('click', () => {
+                button.textContent = 'Loading...';
+                button.disabled = true;
+                progressBar.classList.remove('hidden');
+                const progress = progressBar.firstChild;
+                progress.style.width = '50%'; // Simulate progress
+                
+                // Simulate network delay for a better user experience
+                setTimeout(() => {
+                    progress.style.width = '100%';
+                    setTimeout(() => {
+                        displayResults(true);
+                    }, 200);
+                }, 300);
+            });
+            
+            paginationContainer.appendChild(button);
+            paginationContainer.appendChild(progressBar);
+        }
+        function createDetailContent(journal) {
+            const contentWrapper = document.createElement('div');
+            const formatValue = (value) => (value === null || value === undefined || value === '') ? 'N/A' : value;
+            
+            const otherRanks = {
+                'JUFOLevel': 'JUFO Level',
+                'ABDC2022': 'ABDC 2022',
+                'FNEGE2022': 'FNEGE 2022',
+                'AJG2024': 'AJG 2024',
+                'VHB2024': 'VHB 2024'
+            };
+            const otherRanksHtml = Object.entries(otherRanks).map(([key, displayName]) => {
+                return `<p><strong>${displayName}:</strong> ${formatValue(journal[key])}</p>`;
+            }).join('');
+            const forCodesHtml = [1, 2, 3].map(i => {
+                const code = journal[`FoR${i}Code`];
+                const name = journal[`FoR${i}Name`];
+                return (code && name) ? `<p><strong>FoR ${i}:</strong> ${toTitleCase(name)} (${code})</p>` : '';
+            }).join('');
+            const eliteStatus = journal.IsElite == 1 ? 'Yes' : 'No';
+            const businessRanking = journal.SpecialCalcFlag == 1 ? 'Included' : 'Excluded';
+            const score = parseFloat(journal.Score_Uncertainty);
+            const uncertaintyScore = !isNaN(score) ? score.toFixed(1) : 'N/A';
+            
+            const infoIconSvg = `<svg class="info-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>`;
+            const warningListHtml = journal.OnWarningList === 'Yes'
+                ? `<p class="text-red-600 font-semibold"><strong>Warning List<span onclick="showInfoModal('This indicates if the journal is listed in the Early Warning List published by the Chinese Academy of Sciences.')">${infoIconSvg}</span>:</strong> Yes</p>`
+                : `<p><strong>Warning List<span onclick="showInfoModal('This indicates if the journal is listed in the Early Warning List published by the Chinese Academy of Sciences.')">${infoIconSvg}</span>:</strong> No</p>`;
+            contentWrapper.innerHTML = `
+                <div class="space-y-2 text-sm text-gray-600 pt-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                        <div>
+                            <p><strong class="lau-green">ORBIT Rank:</strong> <span class="lau-green font-semibold">${formatValue(journal.LAU_ORBIT_Rank)}</span></p>
+                            <p><strong>Elite Journal<span onclick="showInfoModal('This indicates if the journal is currently listed in the ARWU Shanghai, FT50, Nature Index, or UTD24 lists.')">${infoIconSvg}</span>:</strong> ${eliteStatus}</p>
+                            ${warningListHtml}
+                            <p><strong>Norwegian Level:</strong> ${formatValue(journal.NorwegianLevel)}</p>
+                            ${otherRanksHtml}
+                             <p><strong>Business Rankings<span onclick="showInfoModal('This indicates if the ORBIT Rank is taking into account ABDC, AJG, FNEGE, and VHB. These rankings are only used for journals primarily focused on business, economics, and finance.')">${infoIconSvg}</span>:</strong> ${businessRanking}</p>
+                             <p><strong>Uncertainty Score<span onclick="showInfoModal('This score quantifies the disagreement among the ranking systems. A low score (e.g., below 5) indicates a reliable grade based on strong consensus, while a high score reveals conflicting views.')">${infoIconSvg}</span>:</strong> ${uncertaintyScore}</p>
+                        </div>
+                        <div>
+                            <p><strong>ISSN1:</strong> ${formatValue(journal.ISSN1)}</p>
+                            <p><strong>ISSN2:</strong> ${formatValue(journal.ISSN2)}</p>
+                            <p><strong>Publisher:</strong> ${formatValue(journal.Publisher)}</p>
+                            <p><strong>Open Access:</strong> ${formatValue(journal.Is_OA)}</p>
+                            <p><strong>Homepage:</strong> ${journal.Homepage ? `<a href="${journal.Homepage}" target="_blank" class="hyperlink">Click here<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a>` : 'N/A'}</p>
+                            <div class="pt-2">
+                                <h4 class="font-bold text-gray-700">Field of Research (FoR)<span onclick="showInfoModal('Field of Research (FoR) as classified by the widely used Australian and New Zealand Standard Research Classification (ANZSRC).')">${infoIconSvg}</span></h4>
+                                ${forCodesHtml || '<p>N/A</p>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return contentWrapper;
+        }
+        function createFilterListItem(journal, listContainer) {
+            const wrapper = document.createElement('div');
+            const summaryItem = document.createElement('div');
+            summaryItem.className = 'summary-item flex justify-between items-center p-3 border rounded-md';
+            summaryItem.innerHTML = `<span class="font-medium text-gray-800">${toTitleCase(journal.JournalName || 'N/A')}</span><span class="lau-green font-semibold text-sm">${journal.LAU_ORBIT_Rank || 'N/A'}</span>`;
+            
+            const detailItem = document.createElement('div');
+            detailItem.className = 'hidden p-4 border border-t-0 rounded-b-md bg-gray-50 detail-view';
+            detailItem.appendChild(createDetailContent(journal));
+            summaryItem.onclick = () => {
+                const allDetails = listContainer.querySelectorAll('.detail-view');
+                allDetails.forEach(detail => {
+                    if (detail !== detailItem && !detail.classList.contains('hidden')) {
+                        detail.classList.add('hidden');
+                        detail.previousElementSibling.classList.remove('rounded-b-none');
+                    }
+                });
+                detailItem.classList.toggle('hidden');
+                summaryItem.classList.toggle('rounded-b-none', !detailItem.classList.contains('hidden'));
+            };
+            
+            wrapper.appendChild(summaryItem);
+            wrapper.appendChild(detailItem);
+            return wrapper;
+        }
+        
+        function createDetailCard(journal) {
+            const card = document.createElement('div');
+            card.className = 'result-card bg-white rounded-lg shadow-md p-5';
+            card.innerHTML = `<h3 class="text-xl font-bold text-gray-800 mb-3">${toTitleCase(journal.JournalName || 'N/A')}</h3>`;
+            card.appendChild(createDetailContent(journal));
+            return card;
+        }
+        // --- Search and Filter Logic ---
+        function handleSearch() {
+            const query = journalInput.value.trim().toLowerCase();
+            if (!query) {
+                currentSearchResults = [];
+                displayResults();
+                return;
+            }
+            const isIssn = /^\d{4}-?\d{3}[\dxX]$/.test(query);
+            
+            if (isIssn) {
+                currentSearchResults = journalData.filter(j => {
+                    const issn1 = String(j.ISSN1 || '').replace('-', '').toLowerCase();
+                    const issn2 = String(j.ISSN2 || '').replace('-', '').toLowerCase();
+                    const queryIssn = query.replace('-', '');
+                    return issn1 === queryIssn || issn2 === queryIssn;
+                });
+            } else {
+                currentSearchResults = fuse.search(query).map(r => r.item);
+            }
+            displayResults();
+        }
+        function handleFilter() {
+            const selectedRanks = tomSelectInstances.ranks.getValue();
+            const selectedForNames = tomSelectInstances.forNames.getValue();
+            const selectedPublishers = tomSelectInstances.publishers.getValue();
+            const selectedOA = openAccessSelect.value;
+            const sortBy = sortSelect.value;
+            let filteredData = journalData.filter(j => {
+                // Modified rankMatch logic
+                const hasRank = !!j.LAU_ORBIT_Rank;
+                const wantsNARank = selectedRanks.includes('N/A');
+                let rankMatch = selectedRanks.length === 0;
+                if (!rankMatch) {
+                    if (hasRank) {
+                        rankMatch = selectedRanks.includes(String(j.LAU_ORBIT_Rank));
+                    } else {
+                        rankMatch = wantsNARank;
+                    }
+                }
+                const publisherMatch = selectedPublishers.length === 0 || selectedPublishers.includes(j.Publisher);
+                const oaMatch = selectedOA === 'All' || j.Is_OA === selectedOA;
+                const forNameMatch = selectedForNames.length === 0 || selectedForNames.some(name => 
+                    toTitleCase(j['FoR1Name']) === name || 
+                    toTitleCase(j['FoR2Name']) === name || 
+                    toTitleCase(j['FoR3Name']) === name
+                );
+                return rankMatch && publisherMatch && forNameMatch && oaMatch;
+            });
+            const rankOrder = ['A+', 'A', 'B', 'C', 'D+', 'D', 'E', 'F'];
+            if (sortBy === 'rank-asc') {
+                filteredData.sort((a, b) => {
+                    const indexA = rankOrder.indexOf(a.LAU_ORBIT_Rank);
+                    const indexB = rankOrder.indexOf(b.LAU_ORBIT_Rank);
+                    if (indexA === -1) return 1;
+                    if (indexB === -1) return -1;
+                    return indexA - indexB;
+                });
+            } else if (sortBy === 'rank-desc') {
+                 filteredData.sort((a, b) => {
+                    const indexA = rankOrder.indexOf(a.LAU_ORBIT_Rank);
+                    const indexB = rankOrder.indexOf(b.LAU_ORBIT_Rank);
+                    if (indexA === -1) return 1;
+                    if (indexB === -1) return -1;
+                    return indexB - indexA;
+                });
+            } else { // Default to name-asc
+                filteredData.sort((a, b) => (a.JournalName || '').localeCompare(b.JournalName || ''));
+            }
+            currentSearchResults = filteredData;
+            displayResults();
+        }
+        function handleResetFilters() {
+            Object.values(tomSelectInstances).forEach(instance => instance.clear());
+            sortSelect.value = 'name-asc';
+            openAccessSelect.value = 'All';
+            resultsContainer.innerHTML = '';
+            paginationContainer.innerHTML = '';
+            currentSearchResults = [];
+        }
+        // --- Initialization and UI Setup ---
+        function populateDropdowns() {
+            const tomSelectSettings = {
+                plugins: ['remove_button'],
+                maxOptions: null, // Show all options
+            };
+            // Ranks
+            const rankOrder = ['A+', 'A', 'B', 'C', 'D+', 'D', 'E', 'F'];
+            const ranks = [...new Set(journalData.map(j => j.LAU_ORBIT_Rank).filter(Boolean))].sort((a, b) => {
+                const indexA = rankOrder.indexOf(a), indexB = rankOrder.indexOf(b);
+                return (indexA !== -1 && indexB !== -1) ? indexA - indexB : a.localeCompare(b);
+            });
+            const rankOptions = ranks.map(r => ({ value: r, text: r }));
+            rankOptions.push({ value: 'N/A', text: 'N/A' }); // Add N/A option
+            tomSelectInstances.ranks = new TomSelect(rankSelect, { ...tomSelectSettings, placeholder: 'Select ranks...', options: rankOptions });
+            // FoR Names
+            const forNames = new Set();
+            journalData.forEach(j => {
+                for (let i = 1; i <= 3; i++) {
+                    const name = j[`FoR${i}Name`];
+                    if (name && name.trim()) forNames.add(toTitleCase(name.trim()));
+                }
+            });
+            const sortedForNames = [...forNames].sort((a, b) => a.localeCompare(b));
+            tomSelectInstances.forNames = new TomSelect(forNameSelect, { ...tomSelectSettings, placeholder: 'Select FoR names...', options: sortedForNames.map(name => ({ value: name, text: name })) });
+            // Publishers
+            const publishers = [...new Set(journalData.map(j => j.Publisher).filter(p => p && p.trim()).map(p => p.trim()))].sort();
+            tomSelectInstances.publishers = new TomSelect(publisherSelect, { ...tomSelectSettings, placeholder: 'Select publishers...', options: publishers.map(p => ({ value: p, text: p })) });
+        }
+        function switchTab(activeTab) {
+            const tabs = {
+                journal: { button: tabJournalSearch, panel: panelJournalSearch },
+                filter: { button: tabFilterSearch, panel: panelFilterSearch },
+                about: { button: tabAbout, panel: panelAbout },
+                faq: { button: tabFaq, panel: panelFaq },
+                contact: { button: tabContact, panel: panelContact }
+            };
+            Object.values(tabs).forEach(({ button, panel }) => {
+                button.classList.remove('active');
+                panel.classList.add('hidden');
+            });
+            tabs[activeTab].button.classList.add('active');
+            tabs[activeTab].panel.classList.remove('hidden');
+            resultsContainer.innerHTML = '';
+            paginationContainer.innerHTML = '';
+            currentSearchResults = [];
+            // Re-render MathJax if the FAQ tab is selected
+            if (activeTab === 'faq' && window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+        
+       const faqData = [
+            // --- Group 1: ORBIT Methodology ---
+            {
+                group: 'faq-group-1',
+                question: '❓ What is the main goal of the ORBIT system?',
+                answer: `The primary goal of ORBIT is to provide a more stable and holistic measure of a journal's standing by synthesizing the expert opinions from multiple, established international ranking systems. This approach helps to resolve disagreements between individual lists and reduces the biases inherent in any single ranking.`
+            },
+            {
+                group: 'faq-group-1',
+                question: '❓ Why are citation-based metrics like JIF, SJR, or CiteScore not used?',
+                answer: `ORBIT is intentionally designed to be an alternative to citation-based metrics. Citation metrics often reward popularity over rigor, and can be inflated by self-citations, editorial strategies, or even paper mills—making them unreliable indicators of true scholarly quality. Our framework prioritizes expert-driven, tier-based evaluations which are designed to reflect perceived academic quality and reputation.`
+            },
+            {
+                group: 'faq-group-1',
+                question: '❓ Can you provide more context on why citation-based metrics are considered problematic?',
+                answer: `Citation-based metrics—such as the h-index, CiteScore, and SNIP—are widely used but suffer from both practical and conceptual flaws. A striking example comes from the 2025 Google Scholar venue rankings, which place <i>IEEE Access</i> and MDPI’s <i>Sustainability</i> among the top 30 journals worldwide—ranking them above <i>Nature Medicine</i>, <i>JACS</i>, and <i>BMJ</i>. This is despite the fact that these journals have been flagged by the Chinese Academy of Sciences and assigned the lowest rating by both JUFO and the Norwegian Register. In mathematics and physics, the situation is reversed: prestigious journals like the <i>Annals of Mathematics</i> are entirely unranked, while questionable titles like <i>Chaos, Solitons & Fractals</i> are prominently listed. This reflects a systemic bias toward citation volume rather than scholarly quality.<br><br>From a theoretical standpoint, these metrics also fail under the lens of statistical decision theory. If journal evaluation is treated as a hypothesis test—where the null hypothesis is that a journal is "not of high quality"—then a reliable metric should minimize both Type I errors (false positives) and Type II errors (false negatives). Citation-based systems are prone to both. For instance, CiteScore places over 130 MDPI journals in the top quartile, including <i>Cells</i>, which appears on the Early Warning List issued by the Chinese Academy of Sciences. Yet expert-based systems like ORBIT assign none of these journals top grades, with most receiving a ‘D’. At the same time, citation metrics tend to penalize respected but slower-citing journals like <i>MIT Sloan Management Review</i>, which ranks poorly despite being on the FT50 list. These inconsistencies highlight how citation-based rankings can mislead real-world decisions in tenure, funding, and evaluation.`
+            },
+            {
+                group: 'faq-group-1',
+                question: '❓ Why are major indexing databases such as Scopus or Web of Science not included as a ranking system?',
+                answer: `Indexing databases serve a different, albeit critical, function: they verify a journal's existence and discoverability, not its quality. Inclusion standards can vary, and presence in an index does not equate to academic reputation. ORBIT focuses on systems that actively assess and rank journals based on quality, not just on their inclusion in a database.`
+            },
+            {
+                group: 'faq-group-1',
+                question: `❓ Why aren’t other national ranking systems like the Danish list or HCERES (France) included?`,
+                answer: `Our methodology requires that we only include ranking systems that are actively and regularly updated, are primarily expert-driven (not purely metric-based), and are integrative in nature. Many national systems are either no longer maintained, rely heavily on citation indicators. If you know of a system that fits our criteria, please let us know.`
+            },
+            {
+                group: 'faq-group-1',
+                question: '❓ Why does ORBIT convert continuous scores into letter grades, and what are the trade-offs?',
+                answer: `Although ORBIT generates a continuous score for each journal, it is quantized into five letter grades (A+, A, B, C, D) to support clearer decision-making in academic evaluation and policy. This five-grade system strikes a balance between simplicity and informativeness. The main benefit is that it offers an easily interpretable summary of a journal's standing. However, this quantization also leads to a loss of detail—two journals with different ORBIT scores might fall into the same grade category. To mitigate this, ORBIT provides a continuous uncertainty score that should be used alongside the letter grade, especially for journals near grade boundaries or with high uncertainty. The fewer the grade levels, the more important it is to consider this uncertainty for a more accurate assessment.`
+            },
+            {
+                group: 'faq-group-1',
+                question: `❓ What are the “Elite” and “Warning” lists used for overrides?`,
+                answer: `To ground our percentile-based grading in a real-world benchmark, we use a "ground truth" for the absolute top and bottom tiers. The "Elite" status is based on a journal's inclusion in highly-regarded international lists like the Nature Index, FT50, and UTD24. The "Warning" status is based on inclusion in lists of predatory or questionable publications, such as the CAS Warning List. These are used to apply a final override, ensuring that journals with a universal reputation for excellence or poor quality are graded accordingly.`
+            },
+            {
+                group: 'faq-group-1',
+                question: `❓How reliable is the “ground truth” dataset used to validate the ranking systems? Could different elite lists change the results?`,
+                answer: `The "ground truth" dataset is based on globally recognized sources, but it has its own inherent subjectivity. The concept of a definitive "elite" list is open to academic debate, and using different ground truth sources could lead to different reliability scores for the ranking systems.`
+            },
+            {
+                group: 'faq-group-1',
+                question: '❓ How does ORBIT perform compared to existing journal ranking systems?',
+                answer: `ORBIT consistently outperforms individual ranking systems in both stability and accuracy. By aggregating multiple expert-based lists through a reliability-weighted, pessimistic approach, it generates a consensus score that reflects the central point of agreement across systems. Our internal coherence analysis shows that ORBIT’s average error against a simple consensus is nearly ten times lower than that of the next-best system—demonstrating that it is not just a compromise, but a statistically superior representation. Its final score distribution is also less volatile and more centrally peaked, offering a more reliable and defensible measure of a journal’s overall standing.`
+            },
+            {
+                group: 'faq-group-1',
+                question: `❓ How often is the ORBIT system updated?`,
+                answer: `The ORBIT rankings are updated whenever one of the six source ranking systems releases a new version. Once a new list is published, the integration and recalculation process typically takes one to two weeks to complete.`
+            },
+            // --- Group 2: Using the ORBIT Rankings ---
+            {
+                group: 'faq-group-2',
+                question: `❓ How is the ORBIT score for a non-business journal calculated, and is it as reliable as the score for a business journal?`,
+                answer: `For journals outside of business and management, the ORBIT score is based primarily on the JUFO and Norwegian systems. Because these are the only comprehensive, multi-disciplinary lists used, the consensus for non-business fields is less diversified than for business journals, which can be evaluated by up to six systems.`
+            },
+            {
+                group: 'faq-group-2',
+                question: `❓ Why doesn't a specific journal have an ORBIT rank?`,
+                answer: `ORBIT only assigns a rank and score to journals that are evaluated by at least two of the six international ranking systems we use. This policy ensures that every ORBIT score is a true consensus and not based on a single opinion. While this may exclude some specialized journals, it significantly increases the reliability of the ranks we do provide.`
+            },
+            {
+                group: 'faq-group-2',
+                question: `❓How should I interpret the "Uncertainty Score"?`,
+                answer: `The Uncertainty Score measures how much the different ranking systems disagree about a journal's quality. A low score (e.g., below 5) is excellent. It indicates a strong consensus, meaning the ORBIT grade is very reliable. A high score (e.g., above 20) is a warning flag. It means the ranking systems have conflicting opinions, so while the ORBIT grade represents the mathematical average, it should be interpreted with caution.`
+            },
+            {
+                group: 'faq-group-2',
+                question: `❓ My journal has a good ORBIT grade (e.g., 'A') but a high uncertainty score. How should I interpret this?`,
+                answer: `This is a key feature of the ORBIT system. It means that while the average of the expert opinions places your journal in a high tier, there is significant disagreement among the different ranking systems. For example, one system might rank it as A+ while another ranks it as B or C. The 'A' grade tells you its overall position, but the high uncertainty score is a crucial piece of context, signaling that the journal's prestige is not universally agreed upon across all academic communities or regions.`
+            },
+            {
+                group: 'faq-group-2',
+                question: `❓ Does ORBIT include conference proceedings?`,
+                answer: `Currently, the ORBIT system focuses exclusively on journals. We recognize the importance of conference proceedings in many fields, especially in computer science and engineering, and are planning to include conference rankings in a future iteration of the system.`
+            },
+             {
+                group: 'faq-group-2',
+                question: `❓Does the ORBIT system unintentionally penalize journals from non-English speaking regions or those with a strong regional focus?`,
+                answer: `The ORBIT model is designed to mitigate this risk by including multiple international systems with different geographical focuses (e.g., VHB for the German-speaking world, FNEGE for France, ABDC for the Asia-Pacific region). By aggregating these diverse perspectives, ORBIT is less likely to be biased by the perspective of any single region compared to relying on a single, globally-dominant list. However, because the included lists are themselves predominantly European and Australian, some regional biases may still persist.`
+            },
+            {
+                group: 'faq-group-2',
+                question: `❓How should a university or a promotion committee use the ORBIT rankings in practice?`,
+                answer: `ORBIT is designed to be a tool that supports, rather than replaces, expert judgment, in line with the DORA and Leiden Manifesto principles. A committee could use the ORBIT Grade as a primary indicator of a journal's overall standing. Crucially, they should also consider the Uncertainty Score. A high uncertainty score should prompt a deeper, qualitative review of the publication, as it indicates that the journal's quality is disputed. Using both metrics together provides a much more nuanced and defensible basis for evaluation than using a simple letter grade alone.`
+            }
+        ];
+        function populateFaqs() {
+            faqData.forEach(item => {
+                const groupContainer = document.getElementById(item.group);
+                if (!groupContainer) return;
+                const faqItem = document.createElement('div');
+                faqItem.className = 'faq-item border rounded-md';
+                faqItem.innerHTML = `
+                    <div class="faq-question cursor-pointer flex justify-between items-center p-4">
+                        <span class="font-medium text-gray-800">${item.question}</span>
+                        <svg class="faq-arrow w-5 h-5 text-gray-500 transition-transform transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                    <div class="faq-answer hidden p-4 border-t border-gray-200 bg-gray-50 text-gray-700 prose max-w-none">
+                        <p>${item.answer}</p>
+                    </div>
+                `;
+                groupContainer.appendChild(faqItem);
+            });
+        }
+        // Event Listeners
+        searchBtn.addEventListener('click', handleSearch);
+        journalInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') handleSearch(); });
+        clearSearchBtn.addEventListener('click', () => {
+            journalInput.value = '';
+            resultsContainer.innerHTML = '';
+            paginationContainer.innerHTML = '';
+            currentSearchResults = [];
+        });
+        filterBtn.addEventListener('click', handleFilter);
+        resetBtn.addEventListener('click', handleResetFilters);
+        tabJournalSearch.addEventListener('click', () => switchTab('journal'));
+        tabFilterSearch.addEventListener('click', () => switchTab('filter'));
+        tabAbout.addEventListener('click', () => switchTab('about'));
+        tabFaq.addEventListener('click', () => switchTab('faq'));
+        tabContact.addEventListener('click', () => switchTab('contact'));
+        
+        panelFaq.addEventListener('click', e => {
+            const questionHeader = e.target.closest('.faq-question');
+            if (!questionHeader) return;
+            const faqItem = questionHeader.parentElement;
+            const answer = faqItem.querySelector('.faq-answer');
+            // Close all other items
+            const allItems = panelFaq.querySelectorAll('.faq-item');
+            allItems.forEach(item => {
+                if (item !== faqItem) {
+                    item.querySelector('.faq-answer').classList.add('hidden');
+                    item.querySelector('.faq-question').classList.remove('active');
+                }
+            });
+            // Toggle the clicked item
+            answer.classList.toggle('hidden');
+            questionHeader.classList.toggle('active');
+        });
+        // Data Loading
+        window.addEventListener('DOMContentLoaded', async () => {
+            populateFaqs(); // Populate the FAQ section
+            resultsContainer.innerHTML = `<div id="loading-container" class="w-full max-w-md mx-auto"><p class="text-center text-gray-600 mb-2">Loading data...</p><div class="w-full bg-gray-200 rounded-full h-2.5"><div id="progress-bar" class="bg-lau-green h-2.5 rounded-full" style="width: 0%"></div></div></div>`;
+            const progressBar = document.getElementById('progress-bar');
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/lauorbit/lauorbit/main/ORBIT.xlsx');
+                if (!response.ok) throw new Error('Network response was not ok.');
+                const contentLength = +response.headers.get('Content-Length');
+                let receivedLength = 0;
+                const chunks = [];
+                const reader = response.body.getReader();
+                while(true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                    receivedLength += value.length;
+                    if (contentLength) progressBar.style.width = `${(receivedLength / contentLength) * 100}%`;
+                }
+                const chunksAll = new Uint8Array(receivedLength);
+                let position = 0;
+                for(let chunk of chunks) {
+                    chunksAll.set(chunk, position);
+                    position += chunk.length;
+                }
+                const workbook = XLSX.read(chunksAll.buffer, {type: 'buffer'});
+                journalData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
+                
+                // Initialize Fuse.js
+                const options = {
+                    includeScore: true,
+                    keys: ['JournalName'],
+                    threshold: 0.4,
+                    ignoreLocation: true,
+                    findAllMatches: true,
+                };
+                fuse = new Fuse(journalData, options);
+                document.getElementById('loading-container').remove();
+                tabContainer.classList.remove('hidden');
+                panelJournalSearch.classList.remove('hidden');
+                populateDropdowns();
+                resultsContainer.innerHTML = '';
+            } catch (error) {
+                console.error('Error loading journal data:', error);
+                resultsContainer.innerHTML = `<p class="text-center text-red-500">Failed to load journal data. Please check the URL and your internet connection.</p>`;
+            }
+        });
+    </script>
 </body>
 </html>
