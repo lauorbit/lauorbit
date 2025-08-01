@@ -1,10 +1,39 @@
+in the code below 
+re-order the FAQ questions as follows:
+ 
+ORBIT Methodology 
+
+What is the main goal of the ORBIT system?
+Why are citation‑based metrics like JIF, SJR, or CiteScore not used?
+Can you provide more context on why citation‑based metrics are considered problematic?
+Why are major indexing databases such as Scopus or Web of Science not included as a ranking system?
+Why aren’t other national ranking systems like the Danish list or HCERES (France) included?
+Why does ORBIT convert continuous scores into letter grades, and what are the trade‑offs?
+What are the “Elite” and “Warning” lists used for overrides?
+How reliable is the “ground truth” dataset used to validate the ranking systems? Could different elite lists change the results?
+How does ORBIT perform compared to existing journal ranking systems?
+How often is the ORBIT system updated?
+
+
+Using the ORBIT Rankings 
+
+How is the ORBIT score for a non‑business journal calculated, and is it as reliable as the score for a business journal?
+Why doesn’t a specific journal have an ORBIT rank?
+How should I interpret the “Uncertainty Score”?
+My journal has a good ORBIT grade (e.g., ‘A’) but a high uncertainty score. How should I interpret this?
+Does ORBIT include conference proceedings?
+Does the ORBIT system unintentionally penalize journals from non‑English‑speaking regions or those with a strong regional focus?
+How should a university or a promotion committee use the ORBIT rankings in practice?
+ 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ORBIT</title>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDD4JMS2G3"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDD4JMS2G3"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -13,14 +42,19 @@
       gtag('config', 'G-HDD4JMS2G3');
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-        <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <!-- Library to read XLSX files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Fuse.js for fuzzy searching -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <!-- Tom-Select for multi-select dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&family=Raleway:wght@400;500;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
-        <script>
+    <!-- Combined fonts for the main page and the animation -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&family=Raleway:wght@400;500;600;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <!-- MathJax for LaTeX rendering -->
+    <script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -200,30 +234,38 @@
 <body class="bg-gray-100">
 
     <div class="container mx-auto p-4 sm:p-6 md:p-8">
-                <header class="text-center mb-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
             
-                        <div class="icon-container">
+            <!-- START: Inserted ORBIT Animation -->
+            <div class="icon-container">
                 <svg width="100%" height="100%" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                                                <filter id="glow">
+                        <!-- Glow filter effect -->
+                        <filter id="glow">
                             <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
                             <feMerge>
                                 <feMergeNode in="coloredBlur"/>
                                 <feMergeNode in="SourceGraphic"/>
                             </feMerge>
                         </filter>
-                                                <linearGradient id="orbitTextGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <!-- Gradient for the central text -->
+                        <linearGradient id="orbitTextGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
                             <stop offset="100%" style="stop-color:#005cff;stop-opacity:1" />
                         </linearGradient>
                     </defs>
     
-                                        <text x="200" y="200" dominant-baseline="central" text-anchor="middle" font-family="'Orbitron', sans-serif" font-size="48" font-weight="bold" fill="url(#orbitTextGradient)" filter="url(#glow)" letter-spacing="2">
+                    <!-- Central Text "ORBIT" -->
+                    <text x="200" y="200" dominant-baseline="central" text-anchor="middle" font-family="'Orbitron', sans-serif" font-size="48" font-weight="bold" fill="url(#orbitTextGradient)" filter="url(#glow)" letter-spacing="2">
                         ORBIT
                     </text>
     
-                                            
-                                        <g>
+                    <!-- Orbits and Satellites -->
+                    <!-- Each satellite is a group containing the path, the satellite circle, and its label -->
+    
+                    <!-- 1. JUFO (Closest) -->
+                    <g>
                         <ellipse cx="200" cy="200" rx="80" ry="40" fill="none" stroke="#4A5568" stroke-width="0.5"/>
                         <circle r="5" fill="#E53E3E">
                             <animateMotion dur="10s" repeatCount="indefinite" path="M280,200 A80,40 0 1,0 120,200 A80,40 0 1,0 280,200" />
@@ -231,7 +273,8 @@
                         <text x="280" y="190" class="satellite-label">JUFO</text>
                     </g>
     
-                                        <g>
+                    <!-- 2. Norwegian Register -->
+                    <g>
                         <ellipse cx="200" cy="200" rx="100" ry="60" fill="none" stroke="#4A5568" stroke-width="0.5"/>
                         <circle r="5" fill="#38A169">
                             <animateMotion dur="12s" repeatCount="indefinite" path="M300,200 A100,60 0 1,0 100,200 A100,60 0 1,0 300,200" />
@@ -239,7 +282,8 @@
                           <text x="100" y="215" class="satellite-label">Norwegian</text>
                     </g>
     
-                                        <g>
+                    <!-- 3. ABDC -->
+                    <g>
                         <ellipse cx="200" cy="200" rx="125" ry="80" fill="none" stroke="#4A5568" stroke-width="0.5"/>
                         <circle r="5" fill="#3182CE">
                             <animateMotion dur="15s" repeatCount="indefinite" path="M325,200 A125,80 0 1,0 75,200 A125,80 0 1,0 325,200" />
@@ -247,7 +291,8 @@
                         <text x="75" y="190" class="satellite-label">ABDC</text>
                     </g>
     
-                                        <g>
+                    <!-- 4. AJG -->
+                    <g>
                         <ellipse cx="200" cy="200" rx="145" ry="100" fill="none" stroke="#4A5568" stroke-width="0.5"/>
                         <circle r="5" fill="#DD6B20">
                             <animateMotion dur="18s" repeatCount="indefinite" path="M345,200 A145,100 0 1,0 55,200 A145,100 0 1,0 345,200" />
@@ -255,7 +300,8 @@
                           <text x="345" y="215" class="satellite-label">AJG</text>
                     </g>
     
-                                        <g>
+                    <!-- 5. VHB -->
+                    <g>
                         <ellipse cx="200" cy="200" rx="170" ry="120" fill="none" stroke="#4A5568" stroke-width="0.5"/>
                         <circle r="5" fill="#805AD5">
                             <animateMotion dur="22s" repeatCount="indefinite" path="M370,200 A170,120 0 1,0 30,200 A170,120 0 1,0 370,200" />
@@ -263,7 +309,8 @@
                         <text x="30" y="215" class="satellite-label">VHB</text>
                     </g>
     
-                                        <g>
+                    <!-- 6. FNEGE (Furthest) -->
+                    <g>
                         <ellipse cx="200" cy="200" rx="190" ry="140" fill="none" stroke="#4A5568" stroke-width="0.5"/>
                         <circle r="5" fill="#D53F8C">
                             <animateMotion dur="25s" repeatCount="indefinite" path="M390,200 A190,140 0 1,0 10,200 A190,140 0 1,0 390,200" />
@@ -272,12 +319,16 @@
                     </g>
                 </svg>
             </div>
-                        <h1 class="text-3xl md:text-4xl font-bold text-gray-800">ORBIT Rankings and Beyond</h1>
+            <!-- END: Inserted ORBIT Animation -->
+
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">ORBIT Rankings and Beyond</h1>
             <p class="text-gray-600 mt-2">Your guide to journal rankings and classifications.</p>
         </header>
 
-                <main id="main-content" class="bg-white p-6 rounded-lg shadow-lg">
-                        <div id="tab-container" class="mb-6 border-b border-gray-200 hidden">
+        <!-- Main Content -->
+        <main id="main-content" class="bg-white p-6 rounded-lg shadow-lg">
+            <!-- Tab Navigation -->
+            <div id="tab-container" class="mb-6 border-b border-gray-200 hidden">
                 <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
                     <button id="tab-journal-search" class="tab-button active text-gray-600 py-3 px-4 text-sm font-medium text-center rounded-t-lg border-transparent">
                         Search for a Journal
@@ -297,7 +348,8 @@
                 </nav>
             </div>
 
-                        <div id="panel-journal-search" class="hidden">
+            <!-- Search by Journal Section -->
+            <div id="panel-journal-search" class="hidden">
                 <div class="flex flex-col sm:flex-row gap-4">
                     <div class="relative w-full search-input-wrapper">
                         <input type="text" id="journal-input" class="search-input w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lau-green" placeholder="Enter journal name or ISSN">
@@ -311,7 +363,8 @@
                 </div>
             </div>
 
-                        <div id="panel-filter-search" class="hidden">
+            <!-- Search by Field/Rank Section -->
+            <div id="panel-filter-search" class="hidden">
                  <p class="text-gray-600 mb-4">Select one or more criteria to filter journals.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
                     <div class="flex flex-col">
@@ -349,7 +402,8 @@
                 </div>
             </div>
             
-                        <div id="panel-about" class="hidden prose max-w-none">
+            <!-- About Section -->
+            <div id="panel-about" class="hidden prose max-w-none">
                 <h2 class="lau-green">About the ORBIT Ranking</h2>
                 <p>This tool provides access to the Objective Ranking through Bias-reduced Integrated Tiers (ORBIT), a comprehensive system designed to offer a stable and holistic view of academic journal quality.</p>
                 <p>ORBIT synthesizes the expert opinions of six major international ranking systems to produce a single consensus grade and an "uncertainy score" that measures the level of agreement among the sources.</p>
@@ -417,20 +471,24 @@
                 <p>We also use <a href="https://openalex.org" target="_blank" class="hyperlink">OpenAlex<svg class="link-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A2.25 2.25 0 0110.5 10.5v-4.5a2.25 2.25 0 012.25-2.25H15M10.5 15L15 10.5" /></svg></a> to obtain non-ranking data (publisher, open access status, etc.).</p>
             </div>
             
-                        <div id="panel-faq" class="hidden space-y-4">
+            <!-- FAQ Section -->
+            <div id="panel-faq" class="hidden space-y-4">
                 <div>
                     <h2 class="text-xl font-bold lau-green">ORBIT Methodology</h2>
                     <div class="space-y-2 mt-2" id="faq-group-1">
-                                            </div>
+                        <!-- FAQ items will be dynamically inserted here -->
+                    </div>
                 </div>
                 <div>
                     <h2 class="text-xl font-bold lau-green mt-6">Using the ORBIT Rankings</h2>
                     <div class="space-y-2 mt-2" id="faq-group-2">
-                                            </div>
+                        <!-- FAQ items will be dynamically inserted here -->
+                    </div>
                 </div>
             </div>
 
-                        <div id="panel-contact" class="hidden">
+            <!-- Contact Us Section -->
+            <div id="panel-contact" class="hidden">
                  <p class="text-gray-600 mb-6">Have an issue, question or suggestion? Please use the form below to get in touch.</p>
                  <div class="aspect-w-1 aspect-h-1" style="height: 856px;">
                     <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSeLPW40BfHHuA6gb6OU1YtDjxE3TRc0SRuvlTGanI9_CwdVkA/viewform?embedded=true" width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
@@ -438,10 +496,13 @@
             </div>
 
 
-                        <div id="results-container" class="mt-8">
-                            </div>
+            <!-- Results Section / Loading Indicator -->
+            <div id="results-container" class="mt-8">
+                <!-- Search results will be dynamically inserted here -->
+            </div>
             <div id="pagination-container" class="mt-8 text-center">
-                            </div>
+                <!-- "Load More" button will be inserted here -->
+            </div>
         </main>
     </div>
 
@@ -861,8 +922,7 @@
             }
         }
         
-        // --- FAQ DATA and POPULATION ---
-        const faqData = [
+       const faqData = [
             // RE-ORDERED FAQ ITEMS
             // ORBIT Methodology
             {
